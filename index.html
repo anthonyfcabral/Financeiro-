@@ -1,0 +1,1258 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>FinApp (Clean Mensal)</title>
+  <meta name="theme-color" content="#121212" />
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    :root{
+      --primary:#2ecc71; --secondary:#e74c3c; --bg:#121212; --card:#1e1e1e;
+      --text:#e0e0e0; --accent:#38bdf8; --weekend:#9b59b6; --input-bg:#2c2c2c;
+      --border:#333;
+    }
+    body{font-family:Segoe UI,sans-serif;background:var(--bg);color:var(--text);margin:0;padding:12px;padding-bottom:90px}
+    .container{max-width:1200px;margin:auto}
+    header{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+    h1{margin:0;font-size:1.1rem}
+    .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+    .btn{background:#2c2c2c;color:#fff;border:1px solid #444;padding:8px 12px;border-radius:10px;cursor:pointer}
+    .btn.primary{background:rgba(56,189,248,.15);border-color:var(--accent);color:var(--accent);font-weight:700}
+    .btn.warn{background:rgba(241,196,15,.12);border-color:#f1c40f;color:#f1c40f;font-weight:700}
+    .btn.danger{background:rgba(231,76,60,.12);border-color:var(--secondary);color:var(--secondary);font-weight:700}
+    select,input{background:var(--input-bg);border:1px solid #444;color:#fff;padding:10px;border-radius:10px;outline:none}
+    .tabs{display:flex;gap:8px;margin:10px 0;flex-wrap:wrap}
+    .tab{background:var(--card);border:1px solid var(--border);color:#888;padding:8px 14px;border-radius:10px;cursor:pointer}
+    .tab.active{background:rgba(56,189,248,.15);border-color:var(--accent);color:var(--accent);font-weight:700}
+    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}
+    .card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px}
+    .card h3{margin:0;font-size:.7rem;opacity:.7;text-transform:uppercase}
+    .card p{margin:8px 0 0;font-size:1.35rem;font-weight:800; transition: filter 0.3s;}
+    .muted{opacity:.7;font-size:.85rem}
+    
+    /* SEÇÕES RETRÁTEIS */
+    .section{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden; transition: max-height 0.3s ease;}
+    .section-bar{display:flex;justify-content:space-between;align-items:center;background:#252525;border-bottom:1px solid var(--border);padding:10px 14px;gap:10px; cursor:pointer; user-select:none;}
+    .section-title{font-weight:800;color:var(--accent); display:flex; align-items:center; gap:8px;}
+    .content{padding:14px;}
+    
+    /* Classe para quando estiver fechado */
+    .section.collapsed .content { display: none; }
+    .section.collapsed .section-bar { border-bottom: none; }
+    .toggle-icon { transition: transform 0.3s; font-size: 0.8rem; opacity: 0.7; }
+    .section.collapsed .toggle-icon { transform: rotate(-90deg); }
+
+    table{width:100%;border-collapse:collapse}
+    td,th{border-bottom:1px solid #2a2a2a;padding:10px;font-size:.9rem;vertical-align:top}
+    th{background:#252525;color:var(--accent);font-size:.75rem;text-align:left}
+    .pill{display:inline-block;border:1px solid #444;border-radius:999px;padding:2px 8px;font-size:.75rem;opacity:.85}
+    .synced{color:var(--weekend);font-weight:800}
+    .row-weekend{background:rgba(155,89,182,.05)}
+    .today{background:rgba(56,189,248,.08);border-left:4px solid var(--accent)}
+    .table-wrap{overflow:auto;border-radius:14px;border:1px solid var(--border)}
+    .chart-box{height:260px; transition: filter 0.3s;}
+    .split{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    @media (max-width: 900px){ .split{grid-template-columns:1fr} }
+    .modal{position:fixed;inset:0;background:rgba(0,0,0,.85);display:none;align-items:center;justify-content:center;z-index:9999}
+    .modal.active{display:flex}
+    .modal-card{width:min(680px,94vw);max-height:90vh;overflow:auto;background:#18181b;border:1px solid var(--border);border-radius:14px;padding:14px}
+    .modal-header{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border);padding-bottom:10px;margin-bottom:12px;gap:10px}
+    .tx-list{background:#121212;border:1px solid var(--border);border-radius:12px;padding:10px;max-height:260px;overflow:auto}
+    .tx-item{display:flex;justify-content:space-between;gap:10px;padding:10px;border-bottom:1px solid #222}
+    .tx-item:last-child{border-bottom:none}
+    .tx-meta{font-size:.78rem;color:#888}
+    .tx-actions button{background:none;border:none;cursor:pointer;font-size:1.05rem}
+    .tx-actions .edit{color:#f1c40f}
+    .tx-actions .del{color:var(--secondary)}
+    .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .full{grid-column:1/-1}
+    .ok{background:var(--accent);color:#000;border:none}
+    .notice{background:rgba(56,189,248,.12);border:1px solid rgba(56,189,248,.4);border-radius:14px;padding:12px;margin-bottom:12px}
+
+    /* ===== MODO PRIVACIDADE (MESTRE) ===== */
+    body.privacy-global-active .card p,
+    body.privacy-global-active td:nth-child(2), 
+    body.privacy-global-active td:nth-child(3),
+    body.privacy-global-active input:not([type="checkbox"]),
+    body.privacy-global-active .chart-box,
+    body.privacy-global-active #catRanking,
+    body.privacy-global-active #dailyRanking {
+        filter: blur(10px) !important;
+        user-select: none;
+        pointer-events: none;
+    }
+  
+    /* ===== Mobile layout fixes (Android) ===== */
+    @media (max-width: 520px){
+      body{padding:10px;padding-bottom:90px}
+      .container{max-width:100%}
+      header{flex-direction:column;align-items:stretch}
+      header .row{width:100%}
+      header .row > *{flex:1;min-width:140px}
+      .tabs{flex-wrap:nowrap;overflow:auto;-webkit-overflow-scrolling:touch}
+      .tab{flex:1;text-align:center}
+      .grid{grid-template-columns:1fr}
+      .card p{font-size:1.25rem}
+      .section-bar{flex-wrap:wrap;align-items:flex-start}
+      .section-bar .btn{width:100%}
+      td,th{padding:8px;font-size:.85rem}
+      th{white-space:nowrap}
+      input,select{width:100%;box-sizing:border-box}
+      .form-grid{grid-template-columns:1fr}
+      .chart-box{height:220px}
+      .modal-card{width:96vw;padding:12px}
+      .tx-item{flex-direction:column;align-items:flex-start}
+      .tx-actions{width:100%;display:flex;justify-content:flex-end;gap:12px}
+    }
+    @media (max-width: 360px){
+      header .row > *{min-width:120px}
+      td,th{padding:7px;font-size:.82rem}
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="notice" id="migrationNotice" style="display:none">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
+        <div>
+          <b>Modo Preview:</b> nada é migrado automaticamente.
+          <div class="muted">Se você quiser testar com seus dados atuais, clique em “Migrar do legado”. Isso cria apenas a chave <span class="pill">finapp_db_v9</span> (não apaga as antigas).</div>
+        </div>
+        <div class="row">
+          <button class="btn warn" id="btnMigrate">Migrar do legado</button>
+          <button class="btn" id="btnDismissNotice">Fechar</button>
+        </div>
+      </div>
+    </div>
+
+    <header>
+      <h1>📱 FinApp (Diário + Mensal) <span class="pill">v9.4</span></h1>
+      <div class="row">
+        <select id="selYear"></select>
+        <select id="selMonth"></select>
+        <button class="btn" id="btnMasterEye" onclick="toggleGlobalPrivacy()" title="Ocultar Valores">👁️ Mestre</button>
+        <button class="btn" id="btnExport">📥 BKP</button>
+        <button class="btn" id="btnImport">📤 Rest</button>
+      </div>
+    </header>
+
+    <div class="tabs">
+      <button class="tab active" id="tabDaily">📅 Diário</button>
+      <button class="tab" id="tabMonthly">📊 Mensal</button>
+    </div>
+
+    <div id="viewDaily">
+      <div class="grid" style="margin-bottom:12px">
+        <div class="card">
+          <h3>Meta Hoje</h3>
+          <p id="dailyMeta">R$ 0,00</p>
+          <div class="muted" id="dailyMetaHint"></div>
+        </div>
+        <div class="card">
+          <h3>Saldo Restante</h3>
+          <p id="dailySaldo">R$ 0,00</p>
+          <div class="muted">Calculado no mês selecionado</div>
+        </div>
+        <div class="card">
+          <h3>Saldo Inicial do Diário</h3>
+          <input id="inpStartBalance" type="number" style="width:100%; box-sizing:border-box; margin-top:8px" />
+          <div class="muted" style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap">
+            <button class="btn warn" id="btnUseMonthlySobra">Usar (Receitas - Fixos)</button>
+            <select id="selWeekendFactor">
+              <option value="1">Finde 1x</option>
+              <option value="1.5">Finde 1.5x</option>
+              <option value="2">Finde 2x</option>
+              <option value="3">Finde 3x</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-bar">
+          <div class="section-title"><span class="toggle-icon">▼</span> 📉 Gráfico diário</div>
+          <span class="pill">gasto por dia</span>
+        </div>
+        <div class="content">
+          <div class="chart-box"><canvas id="chartDaily"></canvas></div>
+        </div>
+      </div>
+
+      <div class="section" style="margin-top:12px">
+        <div class="section-bar">
+          <div class="section-title"><span class="toggle-icon">▼</span> 🏆 Ranking por Categoria</div>
+        </div>
+        <div class="content">
+          <div class="chart-box" style="height:220px; margin-bottom:12px"><canvas id="chartDailyPie"></canvas></div>
+          <div id="dailyRanking"></div>
+        </div>
+      </div>
+
+      <div class="section" style="margin-top:12px">
+        <div class="section-bar">
+          <div class="section-title"><span class="toggle-icon">▼</span> 📅 Lançamentos do mês</div>
+          <button class="btn" id="btnGoToday">Hoje</button>
+        </div>
+        <div class="content">
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th style="width:18%">Dia</th>
+                  <th style="width:20%">Meta</th>
+                  <th style="width:22%">Total do dia</th>
+                  <th>Obs (auto)</th>
+                </tr>
+              </thead>
+              <tbody id="dailyTable"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="viewMonthly" style="display:none">
+      <div class="grid" style="margin-bottom:12px">
+        <div class="card"><h3>Receitas</h3><p id="mIncome">R$ 0,00</p></div>
+        <div class="card"><h3>Fixos + Cartões</h3><p id="mFixed">R$ 0,00</p></div>
+        <div class="card"><h3>Diário</h3><p id="mDaily">R$ 0,00</p></div>
+        <div class="card"><h3>Sobra</h3><p id="mSobra">R$ 0,00</p></div>
+      </div>
+
+      <div class="split">
+        <div class="section">
+          <div class="section-bar"><div class="section-title"><span class="toggle-icon">▼</span> 💰 Receitas</div></div>
+          <div class="content">
+            <div class="form-grid">
+              <input id="inpAdiant" type="number" placeholder="Adiant." />
+              <input id="inpSal" type="number" placeholder="Salário" />
+              <button class="btn full" id="btnAddExtra">+ Extra</button>
+            </div>
+            <div style="margin-top:10px; overflow:auto;">
+              <table>
+                <tbody id="tblExtras"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section-bar"><div class="section-title"><span class="toggle-icon">▼</span> 🔒 Fixas</div></div>
+          <div class="content">
+            <button class="btn" id="btnAddFixed" style="width:100%">+ Conta fixa</button>
+            <div class="table-wrap" style="margin-top:10px">
+              <table>
+                <thead><tr><th style="width:60px">Pago</th><th>Descrição</th><th style="width:130px">Valor</th><th style="width:70px"></th></tr></thead>
+                <tbody id="tblFixed"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section-bar"><div class="section-title"><span class="toggle-icon">▼</span> 💳 Cartões</div></div>
+          <div class="content">
+            <button class="btn" id="btnAddCard" style="width:100%">+ Cartão</button>
+            <div class="table-wrap" style="margin-top:10px">
+              <table>
+                <thead><tr><th>Descrição</th><th style="width:130px">Valor</th><th style="width:70px"></th></tr></thead>
+                <tbody id="tblCards"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section-bar"><div class="section-title"><span class="toggle-icon">▼</span> 📊 Visão & Ranking</div></div>
+          <div class="content">
+            <div class="chart-box"><canvas id="chartMacro"></canvas></div>
+            
+            <div class="chart-box" style="height:150px; margin-top:12px"><canvas id="chartDailyBar"></canvas></div>
+            
+            <div id="catRanking" style="margin-top:10px"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section" style="margin-top:12px">
+        <div class="section-bar"><div class="section-title"><span class="toggle-icon">▼</span> 📝 Notas do mês</div></div>
+        <div class="content">
+          <textarea id="txtNotes" style="width:100%; box-sizing:border-box; min-height:120px; background:var(--input-bg); border:1px solid #444; color:#ddd; padding:12px; border-radius:12px; resize:none" placeholder="Digite suas notas e observações aqui..."></textarea>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="modal" id="modalDay">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div><b>📅 Dia <span id="modalDayLabel"></span></b> <span class="pill" id="modalMonthLabel"></span></div>
+        <button class="btn" id="btnCloseModal">Fechar</button>
+      </div>
+
+      <div class="tx-list" id="txList"></div>
+
+      <div class="card" style="margin-top:12px">
+        <h3 id="formTitle">Novo lançamento</h3>
+        <div class="form-grid" style="margin-top:10px">
+          <select id="txType">
+            <option value="saida">💸 Saída</option>
+            <option value="entrada">💰 Entrada</option>
+          </select>
+          <input id="txVal" type="text" inputmode="decimal" placeholder="Valor (ex: 10+5)" />
+          <select id="txCat">
+            <option value="Mercado">🛒 Mercado</option>
+            <option value="Alimentacao">🍔 Comida Rua</option>
+            <option value="Transporte">🚗 Transporte</option>
+            <option value="Lazer">🍺 Lazer</option>
+            <option value="Casa">🏠 Casa</option>
+            <option value="Saude">💊 Saúde</option>
+            <option value="Viagem">✈️ Viagem/Férias</option>
+            <option value="Outros">⚙️ Outros</option>
+          </select>
+          <select id="txMethod">
+            <option value="Pix">Pix</option>
+            <option value="Credito">Crédito</option>
+            <option value="Debito">Débito</option>
+            <option value="Dinheiro">Dinheiro</option>
+          </select>
+          <input id="txDesc" class="full" type="text" placeholder="Observação / Descrição" />
+          <label class="full muted" style="display:flex;gap:10px;align-items:center">
+            <input id="txPig" type="checkbox" /> 🐷 Enviar para Porquinho
+          </label>
+          <button class="btn ok full" id="btnSaveTx">Adicionar / Salvar</button>
+          <button class="btn full" id="btnCancelEdit" style="display:none">Cancelar edição</button>
+        </div>
+        <div class="muted" style="margin-top:10px">
+          Dica: você pode digitar <b>10+5-2</b> no valor.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+
+// ===== Mobile-safe wrappers (localStorage + Chart) =====
+const __LS = (()=>{
+  try{ const t='__t__'; localStorage.setItem(t,'1'); localStorage.removeItem(t); return localStorage; }catch(e){ return null; }
+})();
+function lsGet(k){ try{ return __LS ? __LS.getItem(k) : null; }catch(e){ return null; } }
+function lsSet(k,v){ try{ if(__LS) __LS.setItem(k,v); }catch(e){} }
+function lsRemove(k){ try{ if(__LS) __LS.removeItem(k); }catch(e){} }
+function hasChart(){ return typeof window.Chart !== 'undefined'; }
+function safeDestroy(ch){ try{ ch && ch.destroy && ch.destroy(); }catch(e){} }
+// =======================================================
+
+/* =========================
+   FinApp DB v9 (localStorage) - Preview build (migração manual)
+   ========================= */
+
+const DB_KEY = 'finapp_db_v9';
+
+// Legado (seus prefixos)
+const LEG_CFG_PREFIX = 'survival_cfg_v4_';
+const LEG_DETAILS_PREFIX = 'survival_details_v3_';
+const LEG_MAIN_KEY = 'financeDB_v8';
+
+// UI
+const monthsPT = ["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
+
+let state = {
+  db: null,
+  year: new Date().getFullYear(),
+  month: new Date().getMonth(),
+  editing: { day: null, txId: null }
+};
+
+let charts = { daily:null, dailyPie:null, macro:null, dailyBar:null }; // removido cats
+
+/* ---------- Funções de UI (Mestre) ---------- */
+function toggleGlobalPrivacy() {
+    const isActive = document.body.classList.toggle('privacy-global-active');
+    const btn = document.getElementById('btnMasterEye');
+    if (isActive) { 
+        btn.style.background = 'var(--secondary)'; 
+        btn.style.borderColor = 'var(--secondary)'; 
+    } else { 
+        btn.style.background = '#2c2c2c'; 
+        btn.style.borderColor = '#444'; 
+    }
+}
+
+/* ---------- Utils ---------- */
+const pad2 = (n) => String(n).padStart(2,'0');
+const monthKey = (y,m) => `${y}-${pad2(m+1)}`;
+const daysInMonth = (y,m) => new Date(y, m+1, 0).getDate();
+
+function money(v){
+  return (v||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+}
+
+function parseAmount(expr){
+  const s = String(expr||'').replace(/\s+/g,'').replace(',', '.');
+  if(!s) throw new Error('empty');
+  if(!/^[0-9+\-\.]+$/.test(s)) throw new Error('invalid');
+  const parts = s.match(/[+\-]?\d*\.?\d+/g) || [];
+  if(!parts.length) throw new Error('invalid');
+  const sum = parts.reduce((acc,p)=>acc + (parseFloat(p)||0),0);
+  if(!Number.isFinite(sum)) throw new Error('invalid');
+  return sum;
+}
+
+function uid(){
+  return `${Date.now().toString(36)}_${Math.random().toString(36).slice(2,8)}`;
+}
+
+function escapeHtml(str){
+  return String(str||'')
+    .replaceAll('&','&amp;')
+    .replaceAll('<','&lt;')
+    .replaceAll('>','&gt;')
+    .replaceAll('"','&quot;')
+    .replaceAll("'","&#039;");
+}
+
+/* ---------- DB ---------- */
+function loadDB(){
+  const raw = lsGet(DB_KEY);
+  if(raw){
+    try { return JSON.parse(raw); } catch {}
+  }
+  return { version: 9, months: {} };
+}
+
+function saveDB(){
+  lsSet(DB_KEY, JSON.stringify(state.db));
+}
+
+function ensureMonthModel(y,m){
+  const k = monthKey(y,m);
+  if(!state.db.months[k]){
+    state.db.months[k] = {
+      cfg: { startBalance: 0, weekendFactor: 1 },
+      incomes: { adiant: 0, sal: 0, extras: [] },
+      expenses: { fixed: [], cards: [] },
+      notes: "",
+      txByDay: {},
+      manualDaily: {}
+    };
+  }
+  return state.db.months[k];
+}
+
+function getMonth(){
+  return ensureMonthModel(state.year, state.month);
+}
+
+/* ---------- Computations ---------- */
+function sumExtras(list){ return (list||[]).reduce((a,x)=>a + (Number(x.val)||0),0); }
+function sumCards(list){ return (list||[]).reduce((a,x)=>a + (Number(x.val)||0),0); }
+function sumFixed(list){ return (list||[]).reduce((a,x)=>a + (Number(x.val)||0),0); }
+
+function dayTotalFromTx(list){
+  return (list||[]).reduce((acc,tx)=>{
+    const v = Number(tx.val)||0;
+    return acc + (tx.type === 'entrada' ? -v : v);
+  },0);
+}
+
+function dayObsFromTx(list){
+  if(!list || !list.length) return '';
+  return list.map(tx=>{
+    const d = tx.desc ? tx.desc : tx.cat;
+    return `[${tx.cat}] ${d}${tx.isPig ? ' (🐷)' : ''}`;
+  }).join(' • ');
+}
+
+function buildMonthlySummary(model){
+  const income = (Number(model.incomes.adiant)||0) + (Number(model.incomes.sal)||0) + sumExtras(model.incomes.extras);
+  const fixed = sumFixed(model.expenses.fixed) + sumCards(model.expenses.cards);
+
+  const dim = daysInMonth(state.year, state.month);
+  const bar = [];
+  const cats = {};
+  let dailyTotal = 0;
+
+  for(let d=1; d<=dim; d++){
+    const list = model.txByDay[String(d)];
+    let dv = 0;
+    if(list && list.length){
+      dv = dayTotalFromTx(list);
+      list.forEach(tx=>{
+        if(tx.type === 'saida'){
+          cats[tx.cat] = (cats[tx.cat] || 0) + (Number(tx.val)||0);
+        }
+      });
+    } else {
+      dv = Number(model.manualDaily[String(d)] || 0);
+    }
+    bar.push(dv);
+    dailyTotal += dv;
+  }
+
+  const sobra = income - fixed - dailyTotal;
+  return { income, fixed, dailyTotal, sobra, bar, cats };
+}
+
+/* ---------- Daily meta algorithm ---------- */
+function computeDailyMetaAndSaldo(model){
+  const dim = daysInMonth(state.year, state.month);
+  const start = Number(model.cfg.startBalance)||0;
+  const factor = Number(model.cfg.weekendFactor)||1;
+
+  let saldo = start;
+  const metas = [];
+  const totals = [];
+
+  for(let day=1; day<=dim; day++){
+    const list = model.txByDay[String(day)];
+    const total = (list && list.length) ? dayTotalFromTx(list) : Number(model.manualDaily[String(day)]||0);
+    totals.push(total);
+
+    let remainingWeekdays = 0, remainingWeekends = 0;
+    for(let k=day; k<=dim; k++){
+      const dow = new Date(state.year, state.month, k).getDay();
+      if(dow === 0 || dow === 6) remainingWeekends++; else remainingWeekdays++;
+    }
+    const weighted = remainingWeekdays + (remainingWeekends * factor);
+    const baseUnit = weighted > 0 ? (saldo / weighted) : 0;
+    const isWeekend = (new Date(state.year, state.month, day).getDay() === 0 || new Date(state.year, state.month, day).getDay() === 6);
+    const meta = isWeekend ? baseUnit * factor : baseUnit;
+    metas.push(meta);
+
+    saldo -= total;
+  }
+
+  return { metas, totals, saldo };
+}
+
+/* ---------- Migração (manual) ---------- */
+function legacyExists(){
+  if(lsGet(LEG_MAIN_KEY)) return true;
+  for(let y=2025; y<=2030; y++){
+    for(let m=0; m<12; m++){
+      const id = `${m}_${y}`;
+      if(lsGet(LEG_DETAILS_PREFIX + id) || lsGet(LEG_CFG_PREFIX + id)) return true;
+    }
+  }
+  return false;
+}
+
+function migrateLegacyToV9(){
+  if(lsGet(DB_KEY)) return;
+
+  const newDB = { version: 9, months: {} };
+
+  // 1) Diário legado
+  for(let y=2025; y<=2030; y++){
+    for(let m=0; m<12; m++){
+      const id = `${m}_${y}`;
+      const cfgRaw = lsGet(LEG_CFG_PREFIX + id);
+      const detRaw = lsGet(LEG_DETAILS_PREFIX + id);
+      if(!cfgRaw && !detRaw) continue;
+
+      const k = monthKey(y,m);
+      newDB.months[k] = newDB.months[k] || {
+        cfg: { startBalance: 0, weekendFactor: 1 },
+        incomes: { adiant: 0, sal: 0, extras: [] },
+        expenses: { fixed: [], cards: [] },
+        notes: "",
+        txByDay: {},
+        manualDaily: {}
+      };
+
+      if(cfgRaw){
+        try{
+          const cfg = JSON.parse(cfgRaw);
+          newDB.months[k].cfg.startBalance = Number(cfg.start)||0;
+          newDB.months[k].cfg.weekendFactor = Number(cfg.weekendFactor)||1;
+        }catch{}
+      }
+
+      if(detRaw){
+        try{
+          const details = JSON.parse(detRaw) || {};
+          Object.keys(details).forEach(day=>{
+            const list = details[day] || [];
+            newDB.months[k].txByDay[String(day)] = list.map(tx=>({
+              id: tx.id || uid(),
+              val: Number(tx.val)||0,
+              type: tx.type || 'saida',
+              cat: tx.cat || 'Outros',
+              method: tx.method || 'Pix',
+              desc: tx.desc || '',
+              isPig: !!tx.isPig,
+              ts: tx.ts || Date.now()
+            }));
+          });
+        }catch{}
+      }
+    }
+  }
+
+  // 2) Mensal legado (financeDB_v8)
+  const v8raw = lsGet(LEG_MAIN_KEY);
+  if(v8raw){
+    try{
+      const v8 = JSON.parse(v8raw) || {};
+      for(let m=0; m<12; m++){
+        if(!v8[m]) continue;
+        const k = monthKey(2026, m);
+        newDB.months[k] = newDB.months[k] || {
+          cfg: { startBalance: 0, weekendFactor: 1 },
+          incomes: { adiant: 0, sal: 0, extras: [] },
+          expenses: { fixed: [], cards: [] },
+          notes: "",
+          txByDay: {},
+          manualDaily: {}
+        };
+        const src = v8[m];
+        newDB.months[k].incomes.adiant = Number(src.adiant)||0;
+        newDB.months[k].incomes.sal = Number(src.sal)||0;
+        newDB.months[k].incomes.extras = (src.extraIncomes||[]).map(x=>({ desc: x.desc||'Extra', val: Number(x.val)||0 }));
+        newDB.months[k].expenses.cards = (src.cards||[]).map(x=>({ desc: x.desc||'Cartão', val: Number(x.val)||0 }));
+        newDB.months[k].expenses.fixed = (src.fixed||[]).map(x=>({ desc: x.desc||'Fixa', val: Number(x.val)||0, paid: !!x.paid }));
+        newDB.months[k].notes = src.notes || '';
+
+        // merge daily fixo do legado
+        if(Array.isArray(src.daily)){
+          src.daily.forEach((v, idx)=>{
+            const d = idx+1;
+            const existingList = newDB.months[k].txByDay[String(d)];
+            if(!existingList || !existingList.length){
+              if(Number(v)) newDB.months[k].manualDaily[String(d)] = Number(v);
+            }
+          });
+        }
+      }
+    }catch{}
+  }
+
+  lsSet(DB_KEY, JSON.stringify(newDB));
+}
+
+/* ---------- Export / Import ---------- */
+function exportV9(){
+  saveDB();
+  const txt = JSON.stringify(state.db, null, 2);
+  const blob = new Blob([txt], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `FINAPP_DB_V9_${monthKey(state.year, state.month)}.json`;
+  a.click();
+}
+
+function importV9(){
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = '.json,application/json';
+  input.onchange = e=>{
+    const file = e.target.files[0];
+    if(!file) return;
+    const r = new FileReader();
+    r.onload = ev=>{
+      try{
+        const obj = JSON.parse(ev.target.result);
+        if(!obj || !obj.months) throw new Error('invalid');
+        lsSet(DB_KEY, JSON.stringify(obj));
+        location.reload();
+      }catch{
+        alert('Backup inválido (esperado DB v9).');
+      }
+    };
+    r.readAsText(file);
+  };
+  input.click();
+}
+
+/* ---------- UI Bindings ---------- */
+function setupSelectors(){
+  const selY = document.getElementById('selYear');
+  const selM = document.getElementById('selMonth');
+
+  selY.innerHTML = '';
+  for(let y=2025; y<=2030; y++){
+    const opt = document.createElement('option');
+    opt.value = String(y);
+    opt.textContent = String(y);
+    selY.appendChild(opt);
+  }
+  selY.value = String(state.year);
+
+  selM.innerHTML = monthsPT.map((m,i)=>`<option value="${i}">${m}</option>`).join('');
+  selM.value = String(state.month);
+
+  selY.onchange = ()=>{ state.year = Number(selY.value); renderAll(); };
+  selM.onchange = ()=>{ state.month = Number(selM.value); renderAll(); };
+}
+
+function setupTabs(){
+  const tabDaily = document.getElementById('tabDaily');
+  const tabMonthly = document.getElementById('tabMonthly');
+  const vDaily = document.getElementById('viewDaily');
+  const vMonthly = document.getElementById('viewMonthly');
+
+  tabDaily.onclick = ()=>{
+    tabDaily.classList.add('active'); tabMonthly.classList.remove('active');
+    vDaily.style.display = ''; vMonthly.style.display='none';
+    renderDaily();
+  };
+  tabMonthly.onclick = ()=>{
+    tabMonthly.classList.add('active'); tabDaily.classList.remove('active');
+    vMonthly.style.display = ''; vDaily.style.display='none';
+    renderMonthly();
+  };
+}
+
+function setupDailyConfig(){
+  const inp = document.getElementById('inpStartBalance');
+  const sel = document.getElementById('selWeekendFactor');
+  const btn = document.getElementById('btnUseMonthlySobra');
+
+  inp.onchange = ()=>{
+    const model = getMonth();
+    model.cfg.startBalance = Number(inp.value)||0;
+    saveDB(); renderDaily();
+  };
+  sel.onchange = ()=>{
+    const model = getMonth();
+    model.cfg.weekendFactor = Number(sel.value)||1;
+    saveDB(); renderDaily();
+  };
+  btn.onclick = ()=>{
+    const model = getMonth();
+    const s = buildMonthlySummary(model);
+    model.cfg.startBalance = Math.max(0, s.income - s.fixed);
+    saveDB(); renderDaily();
+  };
+
+  document.getElementById('btnGoToday').onclick = ()=>{
+    const today = new Date();
+    if(today.getFullYear()!==state.year || today.getMonth()!==state.month){
+      alert('Você não está no mês atual.');
+      return;
+    }
+    const el = document.querySelector('tr.today');
+    if(el) el.scrollIntoView({behavior:'smooth', block:'center'});
+  };
+}
+
+/* ---------- Collapsible Sections ---------- */
+function setupCollapsibles(){
+  document.querySelectorAll('.section-bar').forEach(bar => {
+    bar.addEventListener('click', (e) => {
+      // Evita fechar se clicar num botão dentro da barra (ex: "Hoje")
+      if(e.target.tagName === 'BUTTON' || e.target.closest('button')) return;
+      
+      const section = bar.parentElement;
+      section.classList.toggle('collapsed');
+    });
+  });
+}
+
+/* ---------- Daily modal ---------- */
+function openDayModal(day){
+  state.editing.day = day;
+  state.editing.txId = null;
+  const model = getMonth();
+  const list = model.txByDay[String(day)] || [];
+
+  document.getElementById('modalDayLabel').textContent = String(day).padStart(2,'0');
+  document.getElementById('modalMonthLabel').textContent = `${monthsPT[state.month]} / ${state.year}`;
+  document.getElementById('modalDay').classList.add('active');
+
+  resetTxForm();
+  renderTxList(list);
+}
+
+function closeDayModal(){
+  document.getElementById('modalDay').classList.remove('active');
+  state.editing.day = null;
+  state.editing.txId = null;
+  renderDaily();
+}
+
+function resetTxForm(){
+  document.getElementById('formTitle').textContent = 'Novo lançamento';
+  document.getElementById('txVal').value = '';
+  document.getElementById('txDesc').value = '';
+  document.getElementById('txPig').checked = false;
+  document.getElementById('btnCancelEdit').style.display = 'none';
+  state.editing.txId = null;
+}
+
+function renderTxList(list){
+  const box = document.getElementById('txList');
+  if(!list || !list.length){
+    box.innerHTML = '<div class="muted" style="text-align:center;padding:10px">Nenhuma transação neste dia.</div>';
+    return;
+  }
+  box.innerHTML = list.map(tx=>{
+    const isE = tx.type === 'entrada';
+    const c = isE ? 'var(--primary)' : '#fff';
+    const s = isE ? '+' : '-';
+    return `
+      <div class="tx-item">
+        <div>
+          <b style="color:${c}">${s} ${money(tx.val)}</b>
+          <div class="tx-meta">
+            ${tx.cat} • ${tx.method} ${tx.isPig?' <span class="pill" style="color:#e91e63;border-color:#e91e63">🐷 Pig</span>':''}
+          </div>
+          ${tx.desc ? `<div>${escapeHtml(tx.desc)}</div>` : ''}
+        </div>
+        <div class="tx-actions">
+          <button class="edit" data-edit="${tx.id}">✏️</button>
+          <button class="del" data-del="${tx.id}">🗑️</button>
+        </div>
+      </div>`;
+  }).join('');
+
+  box.querySelectorAll('[data-edit]').forEach(btn=>{
+    btn.onclick = ()=> startEditTx(btn.getAttribute('data-edit'));
+  });
+  box.querySelectorAll('[data-del]').forEach(btn=>{
+    btn.onclick = ()=> deleteTx(btn.getAttribute('data-del'));
+  });
+}
+
+function startEditTx(txId){
+  const model = getMonth();
+  const day = state.editing.day;
+  const list = model.txByDay[String(day)] || [];
+  const tx = list.find(x=>x.id===txId);
+  if(!tx) return;
+
+  state.editing.txId = txId;
+  document.getElementById('formTitle').textContent = 'Editando lançamento';
+  document.getElementById('txType').value = tx.type;
+  document.getElementById('txVal').value = String(tx.val);
+  document.getElementById('txCat').value = tx.cat;
+  document.getElementById('txMethod').value = tx.method;
+  document.getElementById('txDesc').value = tx.desc || '';
+  document.getElementById('txPig').checked = !!tx.isPig;
+  document.getElementById('btnCancelEdit').style.display = '';
+}
+
+function deleteTx(txId){
+  if(!confirm('Excluir este lançamento?')) return;
+  const model = getMonth();
+  const day = state.editing.day;
+  const list = model.txByDay[String(day)] || [];
+  model.txByDay[String(day)] = list.filter(x=>x.id!==txId);
+  saveDB();
+  renderTxList(model.txByDay[String(day)] || []);
+  resetTxForm();
+}
+
+function saveTx(){
+  const model = getMonth();
+  const day = state.editing.day;
+
+  let amount;
+  try{
+    amount = parseAmount(document.getElementById('txVal').value);
+  }catch{
+    alert('Valor inválido.'); return;
+  }
+
+  const tx = {
+    id: state.editing.txId || uid(),
+    val: Math.abs(Number(amount)||0),
+    type: document.getElementById('txType').value,
+    cat: document.getElementById('txCat').value,
+    method: document.getElementById('txMethod').value,
+    desc: document.getElementById('txDesc').value || '',
+    isPig: !!document.getElementById('txPig').checked,
+    ts: Date.now()
+  };
+
+  model.txByDay[String(day)] = model.txByDay[String(day)] || [];
+  if(state.editing.txId){
+    const idx = model.txByDay[String(day)].findIndex(x=>x.id===state.editing.txId);
+    if(idx>=0) model.txByDay[String(day)][idx] = tx;
+  } else {
+    model.txByDay[String(day)].push(tx);
+  }
+
+  delete model.manualDaily[String(day)];
+  saveDB();
+  renderTxList(model.txByDay[String(day)]);
+  resetTxForm();
+}
+
+function setupModal(){
+  document.getElementById('btnCloseModal').onclick = closeDayModal;
+  document.getElementById('btnSaveTx').onclick = saveTx;
+  document.getElementById('btnCancelEdit').onclick = ()=>{
+    state.editing.txId = null;
+    resetTxForm();
+  };
+}
+
+/* ---------- Monthly inputs ---------- */
+function setupMonthly(){
+  const inpAd = document.getElementById('inpAdiant');
+  const inpSa = document.getElementById('inpSal');
+  const txtNotes = document.getElementById('txtNotes');
+
+  const updateInp = ()=>{
+    const model = getMonth();
+    model.incomes.adiant = Number(inpAd.value)||0;
+    model.incomes.sal = Number(inpSa.value)||0;
+    saveDB(); renderMonthly();
+  };
+  inpAd.onchange = updateInp; inpSa.onchange = updateInp;
+
+  txtNotes.onchange = ()=>{
+    getMonth().notes = txtNotes.value || '';
+    saveDB();
+  };
+
+  document.getElementById('btnAddExtra').onclick = ()=>{
+    getMonth().incomes.extras.push({desc:'Novo', val:0});
+    saveDB(); renderMonthly();
+  };
+  document.getElementById('btnAddFixed').onclick = ()=>{
+    getMonth().expenses.fixed.push({desc:'Nova', val:0, paid:false});
+    saveDB(); renderMonthly();
+  };
+  document.getElementById('btnAddCard').onclick = ()=>{
+    getMonth().expenses.cards.push({desc:'Cartão', val:0});
+    saveDB(); renderMonthly();
+  };
+}
+
+function renderTableDynamic(tbodyId, list, typeKey){
+  const tb = document.getElementById(tbodyId);
+  tb.innerHTML = '';
+  (list||[]).forEach((item, i)=>{
+    const tr = document.createElement('tr');
+    let html = '';
+    if(typeKey === 'fixed'){
+      html += `<td style="vertical-align:middle"><input type="checkbox" ${item.paid?'checked':''} data-i="${i}" class="m-chk" style="width:auto"></td>`;
+    }
+    html += `
+      <td><input type="text" value="${escapeHtml(item.desc)}" data-i="${i}" class="m-desc" ${item.paid?'style="text-decoration:line-through;opacity:0.6"':''} /></td>
+      <td><input type="number" step="0.01" value="${item.val}" data-i="${i}" class="m-val" /></td>
+      <td style="vertical-align:middle;text-align:right"><button class="btn danger m-del" data-i="${i}">X</button></td>
+    `;
+    tr.innerHTML = html;
+    tb.appendChild(tr);
+  });
+
+  tb.querySelectorAll('.m-chk').forEach(c=>{
+    c.onchange = ()=>{
+      list[Number(c.getAttribute('data-i'))].paid = !!c.checked;
+      saveDB(); renderMonthly();
+    };
+  });
+  tb.querySelectorAll('.m-desc').forEach(i=>{
+    i.onchange = ()=>{
+      list[Number(i.getAttribute('data-i'))].desc = i.value;
+      saveDB();
+    };
+  });
+  tb.querySelectorAll('.m-val').forEach(i=>{
+    i.onchange = ()=>{
+      list[Number(i.getAttribute('data-i'))].val = Number(i.value)||0;
+      saveDB(); renderMonthly();
+    };
+  });
+  tb.querySelectorAll('.m-del').forEach(b=>{
+    b.onclick = ()=>{
+      if(!confirm('Apagar item?')) return;
+      list.splice(Number(b.getAttribute('data-i')), 1);
+      saveDB(); renderMonthly();
+    };
+  });
+}
+
+/* ---------- Rendering Core ---------- */
+function renderDaily(){
+  const model = getMonth();
+
+  document.getElementById('inpStartBalance').value = model.cfg.startBalance || '';
+  document.getElementById('selWeekendFactor').value = model.cfg.weekendFactor || '1';
+
+  // 1) Meta e Saldo
+  const { metas, totals, saldo } = computeDailyMetaAndSaldo(model);
+  const dim = daysInMonth(state.year, state.month);
+
+  const today = new Date();
+  let todayMeta = 0;
+  let todayIsWeekend = false;
+  if(today.getFullYear()===state.year && today.getMonth()===state.month){
+    const d = today.getDate();
+    if(d>=1 && d<=dim){
+      todayMeta = metas[d-1];
+      todayIsWeekend = (today.getDay()===0 || today.getDay()===6);
+    }
+  }
+
+  document.getElementById('dailyMeta').textContent = money(todayMeta);
+  document.getElementById('dailyMetaHint').textContent = (todayIsWeekend && Number(model.cfg.weekendFactor)>1) ? `🍹 Modo finde ativo (${model.cfg.weekendFactor}x)` : '';
+  document.getElementById('dailySaldo').textContent = money(saldo);
+
+  // 2) Tabela e Gráfico Diário
+  const tbody = document.getElementById('dailyTable');
+  tbody.innerHTML = '';
+
+  const labels = [];
+  const data = [];
+  const colors = [];
+
+  const isCurrentMonth = (today.getFullYear()===state.year && today.getMonth()===state.month);
+
+  for(let d=1; d<=dim; d++){
+    const dateObj = new Date(state.year, state.month, d);
+    const isWeekend = (dateObj.getDay()===0 || dateObj.getDay()===6);
+
+    const list = model.txByDay[String(d)] || [];
+    const hasTx = list.length>0;
+    const total = hasTx ? dayTotalFromTx(list) : Number(model.manualDaily[String(d)]||0);
+    const meta = metas[d-1] || 0;
+    const obs = hasTx ? dayObsFromTx(list) : '';
+    const isToday = isCurrentMonth && d===today.getDate();
+
+    const diff = meta - total;
+    const statusColor = (!hasTx && total===0) ? '#444' : (diff < 0 ? '#e74c3c' : '#2ecc71');
+
+    labels.push(d);
+    data.push(hasTx || total!==0 ? total : null);
+    colors.push((total > meta*1.1) ? '#e74c3c' : (isWeekend ? '#9b59b6' : '#2ecc71'));
+
+    const tr = document.createElement('tr');
+    tr.id = `day-${d}`;
+    tr.className = `${isWeekend?'row-weekend':''} ${isToday?'today':''}`.trim();
+    tr.innerHTML = `
+      <td style="white-space:nowrap;font-weight:800;color:#aaa">
+        ${String(d).padStart(2,'0')}/${pad2(state.month+1)}
+        ${isWeekend?'🍹':''}
+        <span class="pill" style="border-color:${statusColor};color:${statusColor}">${hasTx?'OK':'—'}</span>
+      </td>
+      <td style="font-weight:800;color:${isWeekend?'var(--weekend)':'var(--accent)'}">${money(meta)}</td>
+      <td>
+        <button class="btn ${hasTx?'primary':''}" data-open="${d}" style="width:100%">
+          ${hasTx ? money(total) : (total!==0 ? `${money(total)} (manual)` : '+ Lançar')}
+        </button>
+      </td>
+      <td class="muted">${escapeHtml(obs || (total!==0 ? 'Manual (sem transações)' : '—'))}</td>
+    `;
+    tbody.appendChild(tr);
+  }
+
+  tbody.querySelectorAll('[data-open]').forEach(b=>{
+    b.onclick = ()=> openDayModal(Number(b.getAttribute('data-open')));
+  });
+
+  const cv = document.getElementById('chartDaily');
+  if(cv && cv.getContext && hasChart()){
+    const ctx = cv.getContext('2d');
+    safeDestroy(charts.daily);
+    charts.daily = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels,
+        datasets: [{ data, backgroundColor: colors, borderRadius: 4 }]
+      },
+      options: {
+        responsive:true, maintainAspectRatio:false,
+        plugins:{ legend:{ display:false } },
+        scales:{ 
+          y:{ grid:{ color:'#333' } }, 
+          x:{ 
+            grid:{ display:false },
+            ticks: { autoSkip: false, maxRotation: 90, minRotation: 0, font:{size:10} }
+          } 
+        }
+      }
+    });
+  }
+
+  // 3) NOVO: Ranking no Diário (usa a lógica do mensal)
+  const s = buildMonthlySummary(model);
+  const cats = Object.keys(s.cats).sort((a,b)=>s.cats[b]-s.cats[a]);
+  const vals = cats.map(c=>s.cats[c]);
+
+  const dailyPieCv = document.getElementById('chartDailyPie');
+  if(dailyPieCv && dailyPieCv.getContext && hasChart()){
+    const pieCtx = dailyPieCv.getContext('2d');
+    safeDestroy(charts.dailyPie);
+    charts.dailyPie = new Chart(pieCtx, {
+      type: 'doughnut',
+      data: {
+        labels: cats,
+        datasets:[{ data: vals, backgroundColor:['#e74c3c','#f1c40f','#2ecc71','#3498db','#9b59b6','#e67e22','#1abc9c'], borderWidth:0 }]
+      },
+      options: { 
+        responsive:true, 
+        maintainAspectRatio:false, 
+        layout: { padding: 10 }, 
+        plugins:{ legend:{ display:false } } 
+      }
+    });
+  }
+
+  const totalCat = vals.reduce((a,b)=>a+b,0) || 1;
+  document.getElementById('dailyRanking').innerHTML = cats.map((c,i)=>{
+    const v = vals[i]||0;
+    const pct = (v/totalCat*100).toFixed(1);
+    const icon = c==='Mercado'?'🛒':c==='Transporte'?'🚗':c==='Lazer'?'🍺':c==='Alimentacao'?'🍔':c==='Viagem'?'✈️':'💸';
+    return `<div style="display:flex;justify-content:space-between;border-bottom:1px solid #222;padding:6px 0;font-size:.85rem">
+      <div>${icon} ${c}</div>
+      <div><b>${money(v)}</b> <span class="muted">(${pct}%)</span></div>
+    </div>`;
+  }).join('');
+}
+
+function renderMonthly(){
+  const model = getMonth();
+
+  document.getElementById('inpAdiant').value = model.incomes.adiant || '';
+  document.getElementById('inpSal').value = model.incomes.sal || '';
+  document.getElementById('txtNotes').value = model.notes || '';
+
+  renderTableDynamic('tblExtras', model.incomes.extras, 'extras');
+  renderTableDynamic('tblFixed', model.expenses.fixed, 'fixed');
+  renderTableDynamic('tblCards', model.expenses.cards, 'cards');
+
+  const s = buildMonthlySummary(model);
+
+  document.getElementById('mIncome').textContent = money(s.income);
+  document.getElementById('mFixed').textContent = money(s.fixed);
+  document.getElementById('mDaily').textContent = money(s.dailyTotal);
+
+  const mSob = document.getElementById('mSobra');
+  mSob.textContent = money(s.sobra);
+  mSob.className = s.sobra < 0 ? 'negativo' : 'positivo';
+
+  // charts
+  const cardsSum = sumCards(model.expenses.cards);
+  const fixedOnly = sumFixed(model.expenses.fixed);
+  const daily = s.dailyTotal;
+  const sobra = Math.max(0, s.sobra);
+
+  const macroCv = document.getElementById('chartMacro');
+  if(macroCv && macroCv.getContext && hasChart()){
+    const macroCtx = macroCv.getContext('2d');
+    safeDestroy(charts.macro);
+    charts.macro = new Chart(macroCtx, {
+      type: 'doughnut',
+      data: {
+        labels:['Cartões','Fixas','Diário','Sobra'],
+        datasets:[{
+          data:[cardsSum, fixedOnly, daily, sobra],
+          backgroundColor:['#e74c3c','#2ecc71','#9b59b6','#333'],
+          borderWidth:0
+        }]
+      },
+      options: {
+        responsive:true, maintainAspectRatio:false,
+        plugins:{
+          legend:{ position:'bottom', labels:{ color:'#aaa', font:{size:10} } }
+        }
+      }
+    });
+  }
+
+  const barCv = document.getElementById('chartDailyBar');
+  if(barCv && barCv.getContext && hasChart()){
+    const barCtx = barCv.getContext('2d');
+    safeDestroy(charts.dailyBar);
+    charts.dailyBar = new Chart(barCtx, {
+      type: 'bar',
+      data: {
+        labels: s.bar.map((_,i)=>i+1),
+        datasets:[{ data: s.bar, backgroundColor:'#9b59b6', borderRadius:4 }]
+      },
+      options: {
+        responsive:true, maintainAspectRatio:false,
+        plugins:{ legend:{ display:false } },
+        scales:{ 
+          y:{ display:false }, 
+          x:{ 
+            ticks:{ color:'#444', font:{size:8}, autoSkip:false }
+          } 
+        }
+      }
+    });
+  }
+
+  // REMOVIDO: chartCats do mensal
+  // Mantém apenas o ranking em texto
+  const cats = Object.keys(s.cats).sort((a,b)=>s.cats[b]-s.cats[a]);
+  const vals = cats.map(c=>s.cats[c]);
+  const totalCat = vals.reduce((a,b)=>a+b,0) || 1;
+  document.getElementById('catRanking').innerHTML = cats.map((c,i)=>{
+    const v = vals[i]||0;
+    const pct = (v/totalCat*100).toFixed(1);
+    const icon = c==='Mercado'?'🛒':c==='Transporte'?'🚗':c==='Lazer'?'🍺':c==='Alimentacao'?'🍔':c==='Viagem'?'✈️':'💸';
+    return `<div style="display:flex;justify-content:space-between;border-bottom:1px solid #222;padding:6px 0;font-size:.85rem">
+      <div>${icon} ${c}</div>
+      <div><b>${money(v)}</b> <span class="muted">(${pct}%)</span></div>
+    </div>`;
+  }).join('');
+}
+
+/* ---------- Render all ---------- */
+function renderAll(){
+  ensureMonthModel(state.year, state.month);
+  renderDaily();
+  renderMonthly();
+}
+
+/* ---------- Migração aviso ---------- */
+function setupMigrationNotice(){
+  const notice = document.getElementById('migrationNotice');
+  const btnMig = document.getElementById('btnMigrate');
+  const btnDismiss = document.getElementById('btnDismissNotice');
+
+  if(!lsGet(DB_KEY) && legacyExists()){
+    notice.style.display = '';
+    btnMig.onclick = ()=>{
+      migrateLegacyToV9();
+      alert('Migração concluída! Recarregando...');
+      location.reload();
+    };
+    btnDismiss.onclick = ()=> notice.style.display = 'none';
+  }
+}
+
+/* ---------- Service worker register (somente via http/https) ---------- */
+function registerSW(){
+  if(location.protocol === 'http:' || location.protocol === 'https:'){
+    if('serviceWorker' in navigator){
+      navigator.serviceWorker.register('./service-worker.js').catch(()=>{});
+    }
+  }
+}
+
+/* ---------- Init ---------- */
+(function init(){
+  state.db = loadDB();
+
+  setupSelectors();
+  setupTabs();
+  document.getElementById('btnExport').onclick = exportV9;
+  document.getElementById('btnImport').onclick = importV9;
+
+  setupDailyConfig();
+  setupCollapsibles(); // Ativa o sistema retrátil
+  setupModal();
+  setupMonthly();
+  setupMigrationNotice();
+
+  document.getElementById('modalDay').addEventListener('click', (e)=>{
+    if(e.target.id === 'modalDay') closeDayModal();
+  });
+
+  registerSW();
+  renderAll();
+})();
+
+  </script>
+</body>
+</html>
