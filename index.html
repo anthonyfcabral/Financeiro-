@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>FinApp (Status Corrigido)</title>
+  <title>FinApp (Tabela Ajustada)</title>
   <meta name="theme-color" content="#121212" />
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
@@ -43,8 +43,12 @@
     .section.collapsed .toggle-icon { transform: rotate(-90deg); }
 
     table{width:100%;border-collapse:collapse}
-    td,th{border-bottom:1px solid #2a2a2a;padding:10px;font-size:.9rem;vertical-align:top}
+    td,th{border-bottom:1px solid #2a2a2a;padding:8px;font-size:.9rem;vertical-align:middle}
     th{background:#252525;color:var(--accent);font-size:.75rem;text-align:left}
+    
+    /* Ajustes finos nos inputs da tabela para aproveitar espaço */
+    td input { width: 100%; box-sizing: border-box; padding: 8px; margin:0; }
+
     .pill{display:inline-block;border:1px solid #444;border-radius:999px;padding:2px 8px;font-size:.75rem;opacity:.85; font-weight:700;}
     .synced{color:var(--weekend);font-weight:800}
     .row-weekend{background:rgba(155,89,182,.05)}
@@ -95,8 +99,11 @@
       .card p{font-size:1.25rem}
       .section-bar{flex-wrap:wrap;align-items:flex-start}
       .section-bar .btn{width:100%}
-      td,th{padding:8px;font-size:.85rem}
+      
+      /* Ajuste específico para a tabela caber melhor */
+      td,th{padding:5px;font-size:.85rem}
       th{white-space:nowrap}
+      
       input,select{width:100%;box-sizing:border-box}
       .form-grid{grid-template-columns:1fr}
       .chart-box{height:220px}
@@ -106,7 +113,7 @@
     }
     @media (max-width: 360px){
       header .row > *{min-width:120px}
-      td,th{padding:7px;font-size:.82rem}
+      td,th{padding:4px;font-size:.80rem}
     }
   </style>
 </head>
@@ -126,7 +133,7 @@
     </div>
 
     <header>
-      <h1>📱 FinApp (Diário + Mensal) <span class="pill">v9.5</span></h1>
+      <h1>📱 FinApp (v9.6) <span class="pill">Ajuste Largura</span></h1>
       <div class="row">
         <select id="selYear"></select>
         <select id="selMonth"></select>
@@ -242,7 +249,14 @@
             <button class="btn" id="btnAddFixed" style="width:100%">+ Conta fixa</button>
             <div class="table-wrap" style="margin-top:10px">
               <table>
-                <thead><tr><th style="width:60px">Pago</th><th>Descrição</th><th style="width:130px">Valor</th><th style="width:70px"></th></tr></thead>
+                <thead>
+                    <tr>
+                        <th style="width:30px; text-align:center">Pg</th>
+                        <th>Descrição</th>
+                        <th style="width:85px">Valor</th>
+                        <th style="width:35px"></th>
+                    </tr>
+                </thead>
                 <tbody id="tblFixed"></tbody>
               </table>
             </div>
@@ -255,7 +269,13 @@
             <button class="btn" id="btnAddCard" style="width:100%">+ Cartão</button>
             <div class="table-wrap" style="margin-top:10px">
               <table>
-                <thead><tr><th>Descrição</th><th style="width:130px">Valor</th><th style="width:70px"></th></tr></thead>
+                <thead>
+                    <tr>
+                        <th>Descrição</th>
+                        <th style="width:85px">Valor</th>
+                        <th style="width:35px"></th>
+                    </tr>
+                </thead>
                 <tbody id="tblCards"></tbody>
               </table>
             </div>
@@ -931,12 +951,12 @@ function renderTableDynamic(tbodyId, list, typeKey){
     const tr = document.createElement('tr');
     let html = '';
     if(typeKey === 'fixed'){
-      html += `<td style="vertical-align:middle"><input type="checkbox" ${item.paid?'checked':''} data-i="${i}" class="m-chk" style="width:auto"></td>`;
+      html += `<td style="vertical-align:middle; text-align:center"><input type="checkbox" ${item.paid?'checked':''} data-i="${i}" class="m-chk" style="width:auto; margin:0"></td>`;
     }
     html += `
       <td><input type="text" value="${escapeHtml(item.desc)}" data-i="${i}" class="m-desc" ${item.paid?'style="text-decoration:line-through;opacity:0.6"':''} /></td>
       <td><input type="number" step="0.01" value="${item.val}" data-i="${i}" class="m-val" /></td>
-      <td style="vertical-align:middle;text-align:right"><button class="btn danger m-del" data-i="${i}">X</button></td>
+      <td style="vertical-align:middle;text-align:right"><button class="btn danger m-del" data-i="${i}" style="padding:4px 8px; font-size:0.8rem">X</button></td>
     `;
     tr.innerHTML = html;
     tb.appendChild(tr);
@@ -1019,7 +1039,7 @@ function renderDaily(){
     const diff = meta - total;
     const isOver = diff < 0; // Se gastou mais que a meta
     const statusColor = (!hasTx && total===0) ? '#444' : (isOver ? '#e74c3c' : '#2ecc71');
-    const statusLabel = (!hasTx && total===0) ? '—' : (isOver ? 'Excedeu' : 'OK'); // Correção de texto
+    const statusLabel = (!hasTx && total===0) ? '—' : (isOver ? 'Excedeu' : 'OK');
 
     labels.push(d);
     data.push(hasTx || total!==0 ? total : null);
@@ -1257,6 +1277,3 @@ function registerSW(){
   </script>
 </body>
 </html>
-
-
-
