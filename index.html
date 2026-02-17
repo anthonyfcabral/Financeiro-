@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>FinApp (Clean Mensal)</title>
+  <title>FinApp (Status Corrigido)</title>
   <meta name="theme-color" content="#121212" />
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
@@ -37,7 +37,6 @@
     .section-title{font-weight:800;color:var(--accent); display:flex; align-items:center; gap:8px;}
     .content{padding:14px;}
     
-    /* Classe para quando estiver fechado */
     .section.collapsed .content { display: none; }
     .section.collapsed .section-bar { border-bottom: none; }
     .toggle-icon { transition: transform 0.3s; font-size: 0.8rem; opacity: 0.7; }
@@ -46,7 +45,7 @@
     table{width:100%;border-collapse:collapse}
     td,th{border-bottom:1px solid #2a2a2a;padding:10px;font-size:.9rem;vertical-align:top}
     th{background:#252525;color:var(--accent);font-size:.75rem;text-align:left}
-    .pill{display:inline-block;border:1px solid #444;border-radius:999px;padding:2px 8px;font-size:.75rem;opacity:.85}
+    .pill{display:inline-block;border:1px solid #444;border-radius:999px;padding:2px 8px;font-size:.75rem;opacity:.85; font-weight:700;}
     .synced{color:var(--weekend);font-weight:800}
     .row-weekend{background:rgba(155,89,182,.05)}
     .today{background:rgba(56,189,248,.08);border-left:4px solid var(--accent)}
@@ -127,7 +126,7 @@
     </div>
 
     <header>
-      <h1>📱 FinApp (Diário + Mensal) <span class="pill">v9.4</span></h1>
+      <h1>📱 FinApp (Diário + Mensal) <span class="pill">v9.5</span></h1>
       <div class="row">
         <select id="selYear"></select>
         <select id="selMonth"></select>
@@ -366,7 +365,7 @@ let state = {
   editing: { day: null, txId: null }
 };
 
-let charts = { daily:null, dailyPie:null, macro:null, dailyBar:null }; // removido cats
+let charts = { daily:null, dailyPie:null, macro:null, dailyBar:null };
 
 /* ---------- Funções de UI (Mestre) ---------- */
 function toggleGlobalPrivacy() {
@@ -1018,7 +1017,9 @@ function renderDaily(){
     const isToday = isCurrentMonth && d===today.getDate();
 
     const diff = meta - total;
-    const statusColor = (!hasTx && total===0) ? '#444' : (diff < 0 ? '#e74c3c' : '#2ecc71');
+    const isOver = diff < 0; // Se gastou mais que a meta
+    const statusColor = (!hasTx && total===0) ? '#444' : (isOver ? '#e74c3c' : '#2ecc71');
+    const statusLabel = (!hasTx && total===0) ? '—' : (isOver ? 'Excedeu' : 'OK'); // Correção de texto
 
     labels.push(d);
     data.push(hasTx || total!==0 ? total : null);
@@ -1031,7 +1032,7 @@ function renderDaily(){
       <td style="white-space:nowrap;font-weight:800;color:#aaa">
         ${String(d).padStart(2,'0')}/${pad2(state.month+1)}
         ${isWeekend?'🍹':''}
-        <span class="pill" style="border-color:${statusColor};color:${statusColor}">${hasTx?'OK':'—'}</span>
+        <span class="pill" style="border-color:${statusColor};color:${statusColor}">${statusLabel}</span>
       </td>
       <td style="font-weight:800;color:${isWeekend?'var(--weekend)':'var(--accent)'}">${money(meta)}</td>
       <td>
