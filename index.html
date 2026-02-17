@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>FinApp (v10.3 Obs Expansível)</title>
+  <title>FinApp (v10.5 Resumo Macro)</title>
   <meta name="theme-color" content="#121212" />
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
@@ -48,9 +48,8 @@
     td,th { border-bottom: 1px solid #2a2a2a; padding: 8px; font-size: 0.85rem; vertical-align: middle; }
     th { background: #252525; color: var(--accent); font-size: 0.75rem; text-align: left; white-space: nowrap; }
     
-    /* O segredo da OBS */
     .obs-cell-wrap {
-        max-width: 80px; /* Largura inicial pequena para não quebrar a tabela */
+        max-width: 80px;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
@@ -62,11 +61,9 @@
         transition: all 0.2s;
         font-size: 0.8rem;
     }
-    
-    /* Quando clicado (classe 'expanded' adicionada via JS) */
     .obs-cell-wrap.expanded {
-        white-space: normal; /* Permite quebrar linha */
-        max-width: 200px;    /* Cresce para caber o texto */
+        white-space: normal;
+        max-width: 200px;
         color: #fff;
         background: #222;
         border-color: #444;
@@ -109,7 +106,7 @@
     body.privacy-global-active td:nth-child(3),
     body.privacy-global-active input:not([type="checkbox"]),
     body.privacy-global-active .chart-box,
-    body.privacy-global-active #catRanking,
+    body.privacy-global-active #macroRanking,
     body.privacy-global-active #dailyRanking {
         filter: blur(10px) !important;
         user-select: none;
@@ -155,7 +152,7 @@
     </div>
 
     <header>
-      <h1>📱 FinApp (v10.3) <span class="pill">Obs Clique</span></h1>
+      <h1>📱 FinApp (v10.5) <span class="pill">Macro Mensal</span></h1>
       <div class="row">
         <select id="selYear"></select>
         <select id="selMonth"></select>
@@ -309,8 +306,13 @@
           <div class="section-bar"><div class="section-title"><span class="toggle-icon">▼</span> 📊 Visão & Ranking</div></div>
           <div class="content">
             <div class="chart-box"><canvas id="chartMacro"></canvas></div>
-            <div class="chart-box" style="height:150px; margin-top:12px"><canvas id="chartDailyBar"></canvas></div>
-            <div id="catRanking" style="margin-top:10px"></div>
+            
+            <div class="section-bar" style="margin-top:12px; border-radius:10px">
+                <div class="section-title" style="font-size:0.9rem">📅 Evolução Anual (Gastos Totais)</div>
+            </div>
+            <div class="chart-box" style="height:180px; margin-top:8px"><canvas id="chartYearlyBar"></canvas></div>
+            
+            <div id="macroRanking" style="margin-top:10px"></div>
           </div>
         </div>
       </div>
@@ -379,12 +381,13 @@ function hasChart(){ return typeof window.Chart !== 'undefined'; }
 function safeDestroy(ch){ try{ ch && ch.destroy && ch.destroy(); }catch(e){} }
 
 const DB_KEY = 'finapp_db_v9';
-const monthsPT = ["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
+const monthsPT = ["Jan","Fev","Mar","Abr","Mai","Jun","Jul","Ago","Set","Out","Nov","Dez"];
+const monthsFull = ["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
 const defaultCats = ['🛒 Mercado','🍔 Alimentacao','🚗 Transporte','🍺 Lazer','🏠 Casa','💊 Saude','✈️ Viagem','⚙️ Outros'];
 const LEG_MAIN_KEY='financeDB_v8'; const LEG_CFG_PREFIX='survival_cfg_v4_'; const LEG_DETAILS_PREFIX='survival_details_v3_';
 
 let state = { db: null, year: new Date().getFullYear(), month: new Date().getMonth(), editing: { day: null, txId: null } };
-let charts = { daily:null, dailyPie:null, macro:null, dailyBar:null };
+let charts = { daily:null, dailyPie:null, macro:null, yearlyBar:null };
 
 function toggleGlobalPrivacy() {
     const isActive = document.body.classList.toggle('privacy-global-active');
@@ -460,6 +463,22 @@ function computeDailyMetaAndSaldo(model){
   return {metas,totals,saldo};
 }
 
+function getYearlyData() {
+    const labels = monthsPT;
+    const dataExpenses = [];
+    for (let m = 0; m < 12; m++) {
+        const k = monthKey(state.year, m);
+        const model = state.db.months[k];
+        if (!model) {
+            dataExpenses.push(0);
+            continue;
+        }
+        const s = buildMonthlySummary(model);
+        dataExpenses.push(s.fixed + s.dailyTotal);
+    }
+    return { labels, dataExpenses };
+}
+
 function exportV9(){ saveDB(); const b=new Blob([JSON.stringify(state.db,null,2)],{type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download=`FINAPP_BKP_${monthKey(state.year,state.month)}.json`; a.click(); }
 function importV9(){
   const i=document.createElement('input'); i.type='file'; i.accept='.json';
@@ -469,7 +488,7 @@ function importV9(){
 function setupSelectors(){
   const sy=document.getElementById('selYear'), sm=document.getElementById('selMonth');
   sy.innerHTML=''; for(let y=2025;y<=2030;y++) sy.add(new Option(y,y)); sy.value=state.year;
-  sm.innerHTML=monthsPT.map((m,i)=>`<option value="${i}">${m}</option>`).join(''); sm.value=state.month;
+  sm.innerHTML=monthsFull.map((m,i)=>`<option value="${i}">${m}</option>`).join(''); sm.value=state.month;
   sy.onchange=()=>{state.year=Number(sy.value);renderAll();}; sm.onchange=()=>{state.month=Number(sm.value);renderAll();};
 }
 function setupTabs(){
@@ -500,7 +519,7 @@ window.delCat=(i)=>{if(confirm('Excluir cat?')){state.db.categories.splice(i,1);
 
 function openDayModal(d){
   state.editing.day=d; state.editing.txId=null;
-  document.getElementById('modalDayLabel').textContent=pad2(d); document.getElementById('modalMonthLabel').textContent=`${monthsPT[state.month]}/${state.year}`;
+  document.getElementById('modalDayLabel').textContent=pad2(d); document.getElementById('modalMonthLabel').textContent=`${monthsFull[state.month]}/${state.year}`;
   const sel=document.getElementById('txCat'); sel.innerHTML=(state.db.categories||[]).map(c=>`<option>${escapeHtml(c)}</option>`).join('');
   document.getElementById('modalDay').classList.add('active');
   resetTxForm(); renderTxList(getMonth().txByDay[String(d)]||[]);
@@ -622,16 +641,58 @@ function renderMonthly(){
   const elS=document.getElementById('mSobra'); elS.textContent=money(s.sobra); elS.style.color=s.sobra<0?'#e74c3c':'#2ecc71';
   
   if(hasChart()){
+    // MACRO
     const mc=document.getElementById('chartMacro').getContext('2d'); safeDestroy(charts.macro);
     charts.macro=new Chart(mc,{type:'doughnut',data:{labels:['Fixo+Cartão','Diário','Sobra'],datasets:[{data:[s.fixed,s.dailyTotal,Math.max(0,s.sobra)],backgroundColor:['#e74c3c','#9b59b6','#333'],borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{color:'#aaa'}}}}});
-    const bc=document.getElementById('chartDailyBar').getContext('2d'); safeDestroy(charts.dailyBar);
-    charts.dailyBar=new Chart(bc,{type:'bar',data:{labels:s.bar.map((_,i)=>i+1),datasets:[{data:s.bar,backgroundColor:'#9b59b6',borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{display:false},x:{ticks:{color:'#444',font:{size:8},autoSkip:false}}}}});
+    
+    // ANUAL
+    const yearly = getYearlyData();
+    const bc=document.getElementById('chartYearlyBar').getContext('2d'); safeDestroy(charts.yearlyBar);
+    charts.yearlyBar=new Chart(bc,{
+        type:'bar',
+        data:{
+            labels: yearly.labels,
+            datasets:[{
+                label: 'Gasto Total',
+                data: yearly.dataExpenses,
+                backgroundColor: yearly.labels.map((_,i)=>i===state.month?'#38bdf8':'#444'), 
+                borderRadius:4
+            }]
+        },
+        options:{
+            responsive:true,maintainAspectRatio:false,
+            plugins:{legend:{display:false}},
+            scales:{y:{display:false},x:{ticks:{color:'#666',font:{size:9},autoSkip:false}}}
+        }
+    });
   }
-  const cats=Object.keys(s.cats).sort((a,b)=>s.cats[b]-s.cats[a]); const vals=cats.map(c=>s.cats[c]); const tot=vals.reduce((a,b)=>a+b,0)||1;
-  document.getElementById('catRanking').innerHTML=cats.map((c,i)=>{
-    const v=vals[i]||0, p=(v/tot*100).toFixed(1);
-    return `<div style="display:flex;justify-content:space-between;border-bottom:1px solid #222;padding:6px 0;font-size:.85rem"><div>${c}</div><div><b>${money(v)}</b> <span class="muted">(${p}%)</span></div></div>`;
-  }).join('');
+  
+  // RANKING MACRO MENSAL (CORREÇÃO)
+  const fixedVal = sumFixed(m.expenses.fixed);
+  const cardVal = sumCards(m.expenses.cards);
+  
+  document.getElementById('macroRanking').innerHTML = `
+      <div style="display:flex;justify-content:space-between;border-bottom:1px solid #222;padding:8px 0;font-size:.9rem">
+        <div>💰 Receitas</div>
+        <div style="color:var(--primary)">${money(s.income)}</div>
+      </div>
+      <div style="display:flex;justify-content:space-between;border-bottom:1px solid #222;padding:8px 0;font-size:.9rem">
+        <div>🔒 Fixos</div>
+        <div style="color:#e74c3c">${money(fixedVal)}</div>
+      </div>
+      <div style="display:flex;justify-content:space-between;border-bottom:1px solid #222;padding:8px 0;font-size:.9rem">
+        <div>💳 Cartões</div>
+        <div style="color:#e74c3c">${money(cardVal)}</div>
+      </div>
+      <div style="display:flex;justify-content:space-between;border-bottom:1px solid #222;padding:8px 0;font-size:.9rem">
+        <div>💸 Diário</div>
+        <div style="color:#9b59b6">${money(s.dailyTotal)}</div>
+      </div>
+      <div style="display:flex;justify-content:space-between;padding:8px 0;font-size:1rem;font-weight:bold;margin-top:5px">
+        <div>🐷 Resultado</div>
+        <div style="color:${s.sobra>=0?'var(--primary)':'var(--secondary)'}">${money(s.sobra)}</div>
+      </div>
+  `;
 }
 
 function renderAll(){ ensureMonthModel(state.year,state.month); renderDaily(); renderMonthly(); }
