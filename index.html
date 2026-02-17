@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>FinApp (Tabela Ajustada)</title>
+  <title>FinApp (v10 - Custom Cats)</title>
   <meta name="theme-color" content="#121212" />
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
@@ -45,8 +45,6 @@
     table{width:100%;border-collapse:collapse}
     td,th{border-bottom:1px solid #2a2a2a;padding:8px;font-size:.9rem;vertical-align:middle}
     th{background:#252525;color:var(--accent);font-size:.75rem;text-align:left}
-    
-    /* Ajustes finos nos inputs da tabela para aproveitar espaço */
     td input { width: 100%; box-sizing: border-box; padding: 8px; margin:0; }
 
     .pill{display:inline-block;border:1px solid #444;border-radius:999px;padding:2px 8px;font-size:.75rem;opacity:.85; font-weight:700;}
@@ -72,6 +70,11 @@
     .full{grid-column:1/-1}
     .ok{background:var(--accent);color:#000;border:none}
     .notice{background:rgba(56,189,248,.12);border:1px solid rgba(56,189,248,.4);border-radius:14px;padding:12px;margin-bottom:12px}
+
+    /* Lista de Categorias (Manager) */
+    .cat-list-item{display:flex;justify-content:space-between;align-items:center;padding:10px;border-bottom:1px solid #333;background:#222;}
+    .cat-list-item:first-child{border-top-left-radius:10px; border-top-right-radius:10px;}
+    .cat-list-item:last-child{border-bottom:none;border-bottom-left-radius:10px; border-bottom-right-radius:10px;}
 
     /* ===== MODO PRIVACIDADE (MESTRE) ===== */
     body.privacy-global-active .card p,
@@ -133,10 +136,11 @@
     </div>
 
     <header>
-      <h1>📱 FinApp (v9.6) <span class="pill">Ajuste Largura</span></h1>
+      <h1>📱 FinApp (v10) <span class="pill">Cats Edit</span></h1>
       <div class="row">
         <select id="selYear"></select>
         <select id="selMonth"></select>
+        <button class="btn" id="btnOpenCats" onclick="openCatModal()">📂 Cats</button>
         <button class="btn" id="btnMasterEye" onclick="toggleGlobalPrivacy()" title="Ocultar Valores">👁️ Mestre</button>
         <button class="btn" id="btnExport">📥 BKP</button>
         <button class="btn" id="btnImport">📤 Rest</button>
@@ -321,16 +325,9 @@
             <option value="entrada">💰 Entrada</option>
           </select>
           <input id="txVal" type="text" inputmode="decimal" placeholder="Valor (ex: 10+5)" />
-          <select id="txCat">
-            <option value="Mercado">🛒 Mercado</option>
-            <option value="Alimentacao">🍔 Comida Rua</option>
-            <option value="Transporte">🚗 Transporte</option>
-            <option value="Lazer">🍺 Lazer</option>
-            <option value="Casa">🏠 Casa</option>
-            <option value="Saude">💊 Saúde</option>
-            <option value="Viagem">✈️ Viagem/Férias</option>
-            <option value="Outros">⚙️ Outros</option>
-          </select>
+          
+          <select id="txCat"></select>
+
           <select id="txMethod">
             <option value="Pix">Pix</option>
             <option value="Credito">Crédito</option>
@@ -351,6 +348,27 @@
     </div>
   </div>
 
+  <div class="modal" id="modalCats">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div><b>📂 Gerenciar Categorias</b></div>
+        <button class="btn" onclick="document.getElementById('modalCats').classList.remove('active')">Fechar</button>
+      </div>
+      
+      <div class="card">
+        <h3>Adicionar Nova</h3>
+        <div style="display:flex;gap:8px;margin-top:8px">
+            <input id="newCatName" type="text" placeholder="Ex: 🐶 Pet" style="flex:1" />
+            <button class="btn primary" id="btnAddCat">Adicionar</button>
+        </div>
+      </div>
+
+      <h3 style="margin-top:16px;margin-bottom:8px">Categorias Existentes</h3>
+      <div id="catListContainer" style="max-height:300px;overflow:auto;">
+          </div>
+    </div>
+  </div>
+
   <script>
 
 // ===== Mobile-safe wrappers (localStorage + Chart) =====
@@ -365,10 +383,10 @@ function safeDestroy(ch){ try{ ch && ch.destroy && ch.destroy(); }catch(e){} }
 // =======================================================
 
 /* =========================
-   FinApp DB v9 (localStorage) - Preview build (migração manual)
+   FinApp DB v10 (Com Categorias Dinâmicas)
    ========================= */
 
-const DB_KEY = 'finapp_db_v9';
+const DB_KEY = 'finapp_db_v9'; // Mantendo v9 no nome para compatibilidade de dados, mas é v10 na lógica
 
 // Legado (seus prefixos)
 const LEG_CFG_PREFIX = 'survival_cfg_v4_';
@@ -377,6 +395,7 @@ const LEG_MAIN_KEY = 'financeDB_v8';
 
 // UI
 const monthsPT = ["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
+const defaultCats = ['🛒 Mercado','🍔 Alimentacao','🚗 Transporte','🍺 Lazer','🏠 Casa','💊 Saude','✈️ Viagem','⚙️ Outros'];
 
 let state = {
   db: null,
@@ -436,10 +455,16 @@ function escapeHtml(str){
 /* ---------- DB ---------- */
 function loadDB(){
   const raw = lsGet(DB_KEY);
+  let data = { version: 10, categories: [...defaultCats], months: {} };
+  
   if(raw){
-    try { return JSON.parse(raw); } catch {}
+    try { 
+        const parsed = JSON.parse(raw);
+        data = { ...data, ...parsed }; // Merge to ensure categories exist
+        if(!data.categories || !Array.isArray(data.categories)) data.categories = [...defaultCats];
+    } catch {}
   }
-  return { version: 9, months: {} };
+  return data;
 }
 
 function saveDB(){
@@ -562,7 +587,7 @@ function legacyExists(){
 function migrateLegacyToV9(){
   if(lsGet(DB_KEY)) return;
 
-  const newDB = { version: 9, months: {} };
+  const newDB = { version: 10, categories: [...defaultCats], months: {} };
 
   // 1) Diário legado
   for(let y=2025; y<=2030; y++){
@@ -660,7 +685,7 @@ function exportV9(){
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = `FINAPP_DB_V9_${monthKey(state.year, state.month)}.json`;
+  a.download = `FINAPP_DB_V10_${monthKey(state.year, state.month)}.json`;
   a.click();
 }
 
@@ -679,7 +704,7 @@ function importV9(){
         lsSet(DB_KEY, JSON.stringify(obj));
         location.reload();
       }catch{
-        alert('Backup inválido (esperado DB v9).');
+        alert('Backup inválido ou incompatível.');
       }
     };
     r.readAsText(file);
@@ -772,6 +797,50 @@ function setupCollapsibles(){
   });
 }
 
+/* ---------- CATS MANAGER ---------- */
+function openCatModal(){
+    document.getElementById('modalCats').classList.add('active');
+    renderCatManager();
+}
+
+function renderCatManager(){
+    const list = state.db.categories || [];
+    const container = document.getElementById('catListContainer');
+    container.innerHTML = list.map((cat, i) => `
+        <div class="cat-list-item">
+            <span>${escapeHtml(cat)}</span>
+            <button class="btn danger" onclick="deleteCat(${i})">🗑️</button>
+        </div>
+    `).join('');
+}
+
+function addCat(){
+    const input = document.getElementById('newCatName');
+    const val = input.value.trim();
+    if(!val) return;
+    if(state.db.categories.includes(val)){
+        alert('Categoria já existe!'); return;
+    }
+    state.db.categories.push(val);
+    saveDB();
+    input.value = '';
+    renderCatManager();
+}
+
+function deleteCat(idx){
+    if(!confirm('Excluir categoria? (Transações antigas não mudam)')) return;
+    state.db.categories.splice(idx, 1);
+    saveDB();
+    renderCatManager();
+}
+
+// Atualiza o <select> do modal diário
+function updateCatSelect(){
+    const sel = document.getElementById('txCat');
+    const cats = state.db.categories || [];
+    sel.innerHTML = cats.map(c => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('');
+}
+
 /* ---------- Daily modal ---------- */
 function openDayModal(day){
   state.editing.day = day;
@@ -781,6 +850,10 @@ function openDayModal(day){
 
   document.getElementById('modalDayLabel').textContent = String(day).padStart(2,'0');
   document.getElementById('modalMonthLabel').textContent = `${monthsPT[state.month]} / ${state.year}`;
+  
+  // Atualiza as categorias antes de abrir
+  updateCatSelect();
+  
   document.getElementById('modalDay').classList.add('active');
 
   resetTxForm();
@@ -813,6 +886,7 @@ function renderTxList(list){
     const isE = tx.type === 'entrada';
     const c = isE ? 'var(--primary)' : '#fff';
     const s = isE ? '+' : '-';
+    // Se a categoria da transação não existe mais na lista, mostra ela mesmo assim
     return `
       <div class="tx-item">
         <div>
@@ -848,7 +922,17 @@ function startEditTx(txId){
   document.getElementById('formTitle').textContent = 'Editando lançamento';
   document.getElementById('txType').value = tx.type;
   document.getElementById('txVal').value = String(tx.val);
-  document.getElementById('txCat').value = tx.cat;
+  
+  // Tenta selecionar a categoria. Se ela foi excluída, adiciona temporariamente ao select pra não dar erro visual
+  const selCat = document.getElementById('txCat');
+  if(![...selCat.options].some(o=>o.value === tx.cat)){
+      const opt = document.createElement('option');
+      opt.value = tx.cat;
+      opt.textContent = tx.cat + ' (Arquivada)';
+      selCat.appendChild(opt);
+  }
+  selCat.value = tx.cat;
+
   document.getElementById('txMethod').value = tx.method;
   document.getElementById('txDesc').value = tx.desc || '';
   document.getElementById('txPig').checked = !!tx.isPig;
@@ -909,6 +993,9 @@ function setupModal(){
     state.editing.txId = null;
     resetTxForm();
   };
+  
+  // Manager cats
+  document.getElementById('btnAddCat').onclick = addCat;
 }
 
 /* ---------- Monthly inputs ---------- */
@@ -1121,9 +1208,12 @@ function renderDaily(){
   document.getElementById('dailyRanking').innerHTML = cats.map((c,i)=>{
     const v = vals[i]||0;
     const pct = (v/totalCat*100).toFixed(1);
-    const icon = c==='Mercado'?'🛒':c==='Transporte'?'🚗':c==='Lazer'?'🍺':c==='Alimentacao'?'🍔':c==='Viagem'?'✈️':'💸';
+    // Tenta achar ícone (primeiros 2 chars ou padrão)
+    let icon = c.substring(0,2);
+    if(!/\p{Emoji}/u.test(icon)) icon = '💸';
+
     return `<div style="display:flex;justify-content:space-between;border-bottom:1px solid #222;padding:6px 0;font-size:.85rem">
-      <div>${icon} ${c}</div>
+      <div>${c}</div>
       <div><b>${money(v)}</b> <span class="muted">(${pct}%)</span></div>
     </div>`;
   }).join('');
@@ -1210,9 +1300,12 @@ function renderMonthly(){
   document.getElementById('catRanking').innerHTML = cats.map((c,i)=>{
     const v = vals[i]||0;
     const pct = (v/totalCat*100).toFixed(1);
-    const icon = c==='Mercado'?'🛒':c==='Transporte'?'🚗':c==='Lazer'?'🍺':c==='Alimentacao'?'🍔':c==='Viagem'?'✈️':'💸';
+    // Icone inteligente
+    let icon = c.substring(0,2);
+    if(!/\p{Emoji}/u.test(icon)) icon = '💸';
+    
     return `<div style="display:flex;justify-content:space-between;border-bottom:1px solid #222;padding:6px 0;font-size:.85rem">
-      <div>${icon} ${c}</div>
+      <div>${c}</div>
       <div><b>${money(v)}</b> <span class="muted">(${pct}%)</span></div>
     </div>`;
   }).join('');
@@ -1261,13 +1354,18 @@ function registerSW(){
   document.getElementById('btnImport').onclick = importV9;
 
   setupDailyConfig();
-  setupCollapsibles(); // Ativa o sistema retrátil
+  setupCollapsibles();
   setupModal();
   setupMonthly();
   setupMigrationNotice();
 
   document.getElementById('modalDay').addEventListener('click', (e)=>{
     if(e.target.id === 'modalDay') closeDayModal();
+  });
+  
+  // Cat Manager click outside
+  document.getElementById('modalCats').addEventListener('click', (e)=>{
+    if(e.target.id === 'modalCats') document.getElementById('modalCats').classList.remove('active');
   });
 
   registerSW();
