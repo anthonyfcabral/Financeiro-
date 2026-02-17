@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>FinApp (v10 - Custom Cats)</title>
+  <title>FinApp (v10.3 Obs Expansível)</title>
   <meta name="theme-color" content="#121212" />
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
@@ -36,22 +36,51 @@
     .section-bar{display:flex;justify-content:space-between;align-items:center;background:#252525;border-bottom:1px solid var(--border);padding:10px 14px;gap:10px; cursor:pointer; user-select:none;}
     .section-title{font-weight:800;color:var(--accent); display:flex; align-items:center; gap:8px;}
     .content{padding:14px;}
-    
     .section.collapsed .content { display: none; }
     .section.collapsed .section-bar { border-bottom: none; }
     .toggle-icon { transition: transform 0.3s; font-size: 0.8rem; opacity: 0.7; }
     .section.collapsed .toggle-icon { transform: rotate(-90deg); }
 
-    table{width:100%;border-collapse:collapse}
-    td,th{border-bottom:1px solid #2a2a2a;padding:8px;font-size:.9rem;vertical-align:middle}
-    th{background:#252525;color:var(--accent);font-size:.75rem;text-align:left}
+    /* TABELA DIÁRIA FLUIDA COM OBS EXPANSÍVEL */
+    .table-wrap { overflow-x: auto; border-radius:14px; border:1px solid var(--border); }
+    table { width: 100%; border-collapse: collapse; }
+    
+    td,th { border-bottom: 1px solid #2a2a2a; padding: 8px; font-size: 0.85rem; vertical-align: middle; }
+    th { background: #252525; color: var(--accent); font-size: 0.75rem; text-align: left; white-space: nowrap; }
+    
+    /* O segredo da OBS */
+    .obs-cell-wrap {
+        max-width: 80px; /* Largura inicial pequena para não quebrar a tabela */
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        color: #888;
+        cursor: pointer;
+        padding: 4px;
+        border-radius: 4px;
+        border: 1px solid transparent;
+        transition: all 0.2s;
+        font-size: 0.8rem;
+    }
+    
+    /* Quando clicado (classe 'expanded' adicionada via JS) */
+    .obs-cell-wrap.expanded {
+        white-space: normal; /* Permite quebrar linha */
+        max-width: 200px;    /* Cresce para caber o texto */
+        color: #fff;
+        background: #222;
+        border-color: #444;
+        position: relative;
+        z-index: 10;
+    }
+
     td input { width: 100%; box-sizing: border-box; padding: 8px; margin:0; }
 
-    .pill{display:inline-block;border:1px solid #444;border-radius:999px;padding:2px 8px;font-size:.75rem;opacity:.85; font-weight:700;}
+    .pill{display:inline-block;border:1px solid #444;border-radius:999px;padding:2px 8px;font-size:.7rem;opacity:.85; font-weight:700;}
     .synced{color:var(--weekend);font-weight:800}
     .row-weekend{background:rgba(155,89,182,.05)}
     .today{background:rgba(56,189,248,.08);border-left:4px solid var(--accent)}
-    .table-wrap{overflow:auto;border-radius:14px;border:1px solid var(--border)}
+    
     .chart-box{height:260px; transition: filter 0.3s;}
     .split{display:grid;grid-template-columns:1fr 1fr;gap:12px}
     @media (max-width: 900px){ .split{grid-template-columns:1fr} }
@@ -60,7 +89,7 @@
     .modal-card{width:min(680px,94vw);max-height:90vh;overflow:auto;background:#18181b;border:1px solid var(--border);border-radius:14px;padding:14px}
     .modal-header{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border);padding-bottom:10px;margin-bottom:12px;gap:10px}
     .tx-list{background:#121212;border:1px solid var(--border);border-radius:12px;padding:10px;max-height:260px;overflow:auto}
-    .tx-item{display:flex;justify-content:space-between;gap:10px;padding:10px;border-bottom:1px solid #222}
+    .tx-item{display:flex;justify-content:space-between;gap:10px;padding:10px;border-bottom:1px solid #333}
     .tx-item:last-child{border-bottom:none}
     .tx-meta{font-size:.78rem;color:#888}
     .tx-actions button{background:none;border:none;cursor:pointer;font-size:1.05rem}
@@ -69,14 +98,12 @@
     .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
     .full{grid-column:1/-1}
     .ok{background:var(--accent);color:#000;border:none}
-    .notice{background:rgba(56,189,248,.12);border:1px solid rgba(56,189,248,.4);border-radius:14px;padding:12px;margin-bottom:12px}
-
-    /* Lista de Categorias (Manager) */
     .cat-list-item{display:flex;justify-content:space-between;align-items:center;padding:10px;border-bottom:1px solid #333;background:#222;}
     .cat-list-item:first-child{border-top-left-radius:10px; border-top-right-radius:10px;}
     .cat-list-item:last-child{border-bottom:none;border-bottom-left-radius:10px; border-bottom-right-radius:10px;}
+    .notice{background:rgba(56,189,248,.12);border:1px solid rgba(56,189,248,.4);border-radius:14px;padding:12px;margin-bottom:12px}
 
-    /* ===== MODO PRIVACIDADE (MESTRE) ===== */
+    /* PRIVACIDADE */
     body.privacy-global-active .card p,
     body.privacy-global-active td:nth-child(2), 
     body.privacy-global-active td:nth-child(3),
@@ -89,7 +116,7 @@
         pointer-events: none;
     }
   
-    /* ===== Mobile layout fixes (Android) ===== */
+    /* MOBILE */
     @media (max-width: 520px){
       body{padding:10px;padding-bottom:90px}
       .container{max-width:100%}
@@ -103,20 +130,12 @@
       .section-bar{flex-wrap:wrap;align-items:flex-start}
       .section-bar .btn{width:100%}
       
-      /* Ajuste específico para a tabela caber melhor */
-      td,th{padding:5px;font-size:.85rem}
-      th{white-space:nowrap}
-      
       input,select{width:100%;box-sizing:border-box}
       .form-grid{grid-template-columns:1fr}
       .chart-box{height:220px}
       .modal-card{width:96vw;padding:12px}
       .tx-item{flex-direction:column;align-items:flex-start}
       .tx-actions{width:100%;display:flex;justify-content:flex-end;gap:12px}
-    }
-    @media (max-width: 360px){
-      header .row > *{min-width:120px}
-      td,th{padding:4px;font-size:.80rem}
     }
   </style>
 </head>
@@ -136,7 +155,7 @@
     </div>
 
     <header>
-      <h1>📱 FinApp (v10) <span class="pill">Cats Edit</span></h1>
+      <h1>📱 FinApp (v10.3) <span class="pill">Obs Clique</span></h1>
       <div class="row">
         <select id="selYear"></select>
         <select id="selMonth"></select>
@@ -209,10 +228,10 @@
             <table>
               <thead>
                 <tr>
-                  <th style="width:18%">Dia</th>
-                  <th style="width:20%">Meta</th>
-                  <th style="width:22%">Total do dia</th>
-                  <th>Obs (auto)</th>
+                  <th>Dia</th>
+                  <th>Meta</th>
+                  <th>Total</th>
+                  <th>Obs (Toque p/ ler)</th>
                 </tr>
               </thead>
               <tbody id="dailyTable"></tbody>
@@ -290,9 +309,7 @@
           <div class="section-bar"><div class="section-title"><span class="toggle-icon">▼</span> 📊 Visão & Ranking</div></div>
           <div class="content">
             <div class="chart-box"><canvas id="chartMacro"></canvas></div>
-            
             <div class="chart-box" style="height:150px; margin-top:12px"><canvas id="chartDailyBar"></canvas></div>
-            
             <div id="catRanking" style="margin-top:10px"></div>
           </div>
         </div>
@@ -304,7 +321,6 @@
           <textarea id="txtNotes" style="width:100%; box-sizing:border-box; min-height:120px; background:var(--input-bg); border:1px solid #444; color:#ddd; padding:12px; border-radius:12px; resize:none" placeholder="Digite suas notas e observações aqui..."></textarea>
         </div>
       </div>
-
     </div>
   </div>
 
@@ -314,25 +330,16 @@
         <div><b>📅 Dia <span id="modalDayLabel"></span></b> <span class="pill" id="modalMonthLabel"></span></div>
         <button class="btn" id="btnCloseModal">Fechar</button>
       </div>
-
       <div class="tx-list" id="txList"></div>
-
       <div class="card" style="margin-top:12px">
         <h3 id="formTitle">Novo lançamento</h3>
         <div class="form-grid" style="margin-top:10px">
-          <select id="txType">
-            <option value="saida">💸 Saída</option>
-            <option value="entrada">💰 Entrada</option>
-          </select>
+          <select id="txType"><option value="saida">💸 Saída</option><option value="entrada">💰 Entrada</option></select>
           <input id="txVal" type="text" inputmode="decimal" placeholder="Valor (ex: 10+5)" />
-          
           <select id="txCat"></select>
-
           <select id="txMethod">
-            <option value="Pix">Pix</option>
-            <option value="Credito">Crédito</option>
-            <option value="Debito">Débito</option>
-            <option value="Dinheiro">Dinheiro</option>
+            <option value="Pix">Pix</option><option value="Credito">Crédito</option>
+            <option value="Debito">Débito</option><option value="Dinheiro">Dinheiro</option>
           </select>
           <input id="txDesc" class="full" type="text" placeholder="Observação / Descrição" />
           <label class="full muted" style="display:flex;gap:10px;align-items:center">
@@ -340,9 +347,6 @@
           </label>
           <button class="btn ok full" id="btnSaveTx">Adicionar / Salvar</button>
           <button class="btn full" id="btnCancelEdit" style="display:none">Cancelar edição</button>
-        </div>
-        <div class="muted" style="margin-top:10px">
-          Dica: você pode digitar <b>10+5-2</b> no valor.
         </div>
       </div>
     </div>
@@ -354,7 +358,6 @@
         <div><b>📂 Gerenciar Categorias</b></div>
         <button class="btn" onclick="document.getElementById('modalCats').classList.remove('active')">Fechar</button>
       </div>
-      
       <div class="card">
         <h3>Adicionar Nova</h3>
         <div style="display:flex;gap:8px;margin-top:8px">
@@ -362,1016 +365,301 @@
             <button class="btn primary" id="btnAddCat">Adicionar</button>
         </div>
       </div>
-
       <h3 style="margin-top:16px;margin-bottom:8px">Categorias Existentes</h3>
-      <div id="catListContainer" style="max-height:300px;overflow:auto;">
-          </div>
+      <div id="catListContainer" style="max-height:300px;overflow:auto;"></div>
     </div>
   </div>
 
   <script>
-
-// ===== Mobile-safe wrappers (localStorage + Chart) =====
-const __LS = (()=>{
-  try{ const t='__t__'; localStorage.setItem(t,'1'); localStorage.removeItem(t); return localStorage; }catch(e){ return null; }
-})();
+// ===== Mobile-safe wrappers =====
+const __LS = (()=>{ try{ const t='__t__'; localStorage.setItem(t,'1'); localStorage.removeItem(t); return localStorage; }catch(e){ return null; } })();
 function lsGet(k){ try{ return __LS ? __LS.getItem(k) : null; }catch(e){ return null; } }
 function lsSet(k,v){ try{ if(__LS) __LS.setItem(k,v); }catch(e){} }
-function lsRemove(k){ try{ if(__LS) __LS.removeItem(k); }catch(e){} }
 function hasChart(){ return typeof window.Chart !== 'undefined'; }
 function safeDestroy(ch){ try{ ch && ch.destroy && ch.destroy(); }catch(e){} }
-// =======================================================
 
-/* =========================
-   FinApp DB v10 (Com Categorias Dinâmicas)
-   ========================= */
-
-const DB_KEY = 'finapp_db_v9'; // Mantendo v9 no nome para compatibilidade de dados, mas é v10 na lógica
-
-// Legado (seus prefixos)
-const LEG_CFG_PREFIX = 'survival_cfg_v4_';
-const LEG_DETAILS_PREFIX = 'survival_details_v3_';
-const LEG_MAIN_KEY = 'financeDB_v8';
-
-// UI
+const DB_KEY = 'finapp_db_v9';
 const monthsPT = ["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
 const defaultCats = ['🛒 Mercado','🍔 Alimentacao','🚗 Transporte','🍺 Lazer','🏠 Casa','💊 Saude','✈️ Viagem','⚙️ Outros'];
+const LEG_MAIN_KEY='financeDB_v8'; const LEG_CFG_PREFIX='survival_cfg_v4_'; const LEG_DETAILS_PREFIX='survival_details_v3_';
 
-let state = {
-  db: null,
-  year: new Date().getFullYear(),
-  month: new Date().getMonth(),
-  editing: { day: null, txId: null }
-};
-
+let state = { db: null, year: new Date().getFullYear(), month: new Date().getMonth(), editing: { day: null, txId: null } };
 let charts = { daily:null, dailyPie:null, macro:null, dailyBar:null };
 
-/* ---------- Funções de UI (Mestre) ---------- */
 function toggleGlobalPrivacy() {
     const isActive = document.body.classList.toggle('privacy-global-active');
     const btn = document.getElementById('btnMasterEye');
-    if (isActive) { 
-        btn.style.background = 'var(--secondary)'; 
-        btn.style.borderColor = 'var(--secondary)'; 
-    } else { 
-        btn.style.background = '#2c2c2c'; 
-        btn.style.borderColor = '#444'; 
-    }
+    if(isActive){ btn.style.background='var(--secondary)'; btn.style.borderColor='var(--secondary)'; }
+    else{ btn.style.background='#2c2c2c'; btn.style.borderColor='#444'; }
 }
 
-/* ---------- Utils ---------- */
-const pad2 = (n) => String(n).padStart(2,'0');
-const monthKey = (y,m) => `${y}-${pad2(m+1)}`;
-const daysInMonth = (y,m) => new Date(y, m+1, 0).getDate();
-
-function money(v){
-  return (v||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
-}
-
+const pad2=(n)=>String(n).padStart(2,'0');
+const monthKey=(y,m)=>`${y}-${pad2(m+1)}`;
+const daysInMonth=(y,m)=>new Date(y, m+1, 0).getDate();
+function money(v){ return (v||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'}); }
 function parseAmount(expr){
-  const s = String(expr||'').replace(/\s+/g,'').replace(',', '.');
-  if(!s) throw new Error('empty');
-  if(!/^[0-9+\-\.]+$/.test(s)) throw new Error('invalid');
-  const parts = s.match(/[+\-]?\d*\.?\d+/g) || [];
-  if(!parts.length) throw new Error('invalid');
-  const sum = parts.reduce((acc,p)=>acc + (parseFloat(p)||0),0);
-  if(!Number.isFinite(sum)) throw new Error('invalid');
-  return sum;
+  const s=String(expr||'').replace(/\s+/g,'').replace(',', '.');
+  if(!s)throw new Error('empty'); if(!/^[0-9+\-\.]+$/.test(s))throw new Error('invalid');
+  const sum=(s.match(/[+\-]?\d*\.?\d+/g)||[]).reduce((a,p)=>a+(parseFloat(p)||0),0);
+  if(!Number.isFinite(sum))throw new Error('invalid'); return sum;
 }
+function uid(){ return `${Date.now().toString(36)}_${Math.random().toString(36).slice(2,8)}`; }
+function escapeHtml(str){ return String(str||'').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'","&#039;"); }
 
-function uid(){
-  return `${Date.now().toString(36)}_${Math.random().toString(36).slice(2,8)}`;
-}
-
-function escapeHtml(str){
-  return String(str||'')
-    .replaceAll('&','&amp;')
-    .replaceAll('<','&lt;')
-    .replaceAll('>','&gt;')
-    .replaceAll('"','&quot;')
-    .replaceAll("'","&#039;");
-}
-
-/* ---------- DB ---------- */
 function loadDB(){
-  const raw = lsGet(DB_KEY);
-  let data = { version: 10, categories: [...defaultCats], months: {} };
-  
-  if(raw){
-    try { 
-        const parsed = JSON.parse(raw);
-        data = { ...data, ...parsed }; // Merge to ensure categories exist
-        if(!data.categories || !Array.isArray(data.categories)) data.categories = [...defaultCats];
-    } catch {}
-  }
+  const raw=lsGet(DB_KEY); let data={version:10,categories:[...defaultCats],months:{}};
+  if(raw){ try{ const parsed=JSON.parse(raw); data={...data,...parsed}; if(!data.categories) data.categories=[...defaultCats]; }catch{} }
   return data;
 }
-
-function saveDB(){
-  lsSet(DB_KEY, JSON.stringify(state.db));
-}
-
+function saveDB(){ lsSet(DB_KEY, JSON.stringify(state.db)); }
 function ensureMonthModel(y,m){
-  const k = monthKey(y,m);
-  if(!state.db.months[k]){
-    state.db.months[k] = {
-      cfg: { startBalance: 0, weekendFactor: 1 },
-      incomes: { adiant: 0, sal: 0, extras: [] },
-      expenses: { fixed: [], cards: [] },
-      notes: "",
-      txByDay: {},
-      manualDaily: {}
-    };
-  }
+  const k=monthKey(y,m);
+  if(!state.db.months[k]) state.db.months[k]={ cfg:{startBalance:0,weekendFactor:1}, incomes:{adiant:0,sal:0,extras:[]}, expenses:{fixed:[],cards:[]}, notes:"", txByDay:{}, manualDaily:{} };
   return state.db.months[k];
 }
+function getMonth(){ return ensureMonthModel(state.year, state.month); }
 
-function getMonth(){
-  return ensureMonthModel(state.year, state.month);
-}
-
-/* ---------- Computations ---------- */
 function sumExtras(list){ return (list||[]).reduce((a,x)=>a + (Number(x.val)||0),0); }
 function sumCards(list){ return (list||[]).reduce((a,x)=>a + (Number(x.val)||0),0); }
 function sumFixed(list){ return (list||[]).reduce((a,x)=>a + (Number(x.val)||0),0); }
-
-function dayTotalFromTx(list){
-  return (list||[]).reduce((acc,tx)=>{
-    const v = Number(tx.val)||0;
-    return acc + (tx.type === 'entrada' ? -v : v);
-  },0);
-}
-
-function dayObsFromTx(list){
-  if(!list || !list.length) return '';
-  return list.map(tx=>{
-    const d = tx.desc ? tx.desc : tx.cat;
-    return `[${tx.cat}] ${d}${tx.isPig ? ' (🐷)' : ''}`;
-  }).join(' • ');
-}
+function dayTotalFromTx(list){ return (list||[]).reduce((acc,tx)=>{ const v=Number(tx.val)||0; return acc+(tx.type==='entrada'?-v:v); },0); }
+function dayObsFromTx(list){ if(!list||!list.length)return ''; return list.map(tx=>`${tx.cat} ${tx.desc?`(${tx.desc})`:''}`).join(' • '); }
 
 function buildMonthlySummary(model){
-  const income = (Number(model.incomes.adiant)||0) + (Number(model.incomes.sal)||0) + sumExtras(model.incomes.extras);
-  const fixed = sumFixed(model.expenses.fixed) + sumCards(model.expenses.cards);
-
-  const dim = daysInMonth(state.year, state.month);
-  const bar = [];
-  const cats = {};
-  let dailyTotal = 0;
-
+  const income=(Number(model.incomes.adiant)||0)+(Number(model.incomes.sal)||0)+sumExtras(model.incomes.extras);
+  const fixed=sumFixed(model.expenses.fixed)+sumCards(model.expenses.cards);
+  const dim=daysInMonth(state.year, state.month);
+  const bar=[]; const cats={}; let dailyTotal=0;
   for(let d=1; d<=dim; d++){
-    const list = model.txByDay[String(d)];
-    let dv = 0;
-    if(list && list.length){
-      dv = dayTotalFromTx(list);
-      list.forEach(tx=>{
-        if(tx.type === 'saida'){
-          cats[tx.cat] = (cats[tx.cat] || 0) + (Number(tx.val)||0);
-        }
-      });
-    } else {
-      dv = Number(model.manualDaily[String(d)] || 0);
-    }
-    bar.push(dv);
-    dailyTotal += dv;
+    const list=model.txByDay[String(d)];
+    let dv=0;
+    if(list&&list.length){
+      dv=dayTotalFromTx(list);
+      list.forEach(tx=>{ if(tx.type==='saida') cats[tx.cat]=(cats[tx.cat]||0)+(Number(tx.val)||0); });
+    } else dv=Number(model.manualDaily[String(d)]||0);
+    bar.push(dv); dailyTotal+=dv;
   }
-
-  const sobra = income - fixed - dailyTotal;
-  return { income, fixed, dailyTotal, sobra, bar, cats };
+  return {income,fixed,dailyTotal,sobra:income-fixed-dailyTotal,bar,cats};
 }
 
-/* ---------- Daily meta algorithm ---------- */
 function computeDailyMetaAndSaldo(model){
-  const dim = daysInMonth(state.year, state.month);
-  const start = Number(model.cfg.startBalance)||0;
-  const factor = Number(model.cfg.weekendFactor)||1;
-
-  let saldo = start;
-  const metas = [];
-  const totals = [];
-
+  const dim=daysInMonth(state.year, state.month);
+  const start=Number(model.cfg.startBalance)||0; const factor=Number(model.cfg.weekendFactor)||1;
+  let saldo=start; const metas=[]; const totals=[];
   for(let day=1; day<=dim; day++){
-    const list = model.txByDay[String(day)];
-    const total = (list && list.length) ? dayTotalFromTx(list) : Number(model.manualDaily[String(day)]||0);
+    const list=model.txByDay[String(day)];
+    const total=(list&&list.length)?dayTotalFromTx(list):Number(model.manualDaily[String(day)]||0);
     totals.push(total);
-
-    let remainingWeekdays = 0, remainingWeekends = 0;
-    for(let k=day; k<=dim; k++){
-      const dow = new Date(state.year, state.month, k).getDay();
-      if(dow === 0 || dow === 6) remainingWeekends++; else remainingWeekdays++;
-    }
-    const weighted = remainingWeekdays + (remainingWeekends * factor);
-    const baseUnit = weighted > 0 ? (saldo / weighted) : 0;
-    const isWeekend = (new Date(state.year, state.month, day).getDay() === 0 || new Date(state.year, state.month, day).getDay() === 6);
-    const meta = isWeekend ? baseUnit * factor : baseUnit;
-    metas.push(meta);
-
-    saldo -= total;
+    let wd=0, we=0;
+    for(let k=day; k<=dim; k++){ const dow=new Date(state.year,state.month,k).getDay(); if(dow===0||dow===6)we++; else wd++; }
+    const w=wd+(we*factor); const base=w>0?(saldo/w):0;
+    const isW=(new Date(state.year,state.month,day).getDay()===0||new Date(state.year,state.month,day).getDay()===6);
+    metas.push(isW?base*factor:base);
+    saldo-=total;
   }
-
-  return { metas, totals, saldo };
+  return {metas,totals,saldo};
 }
 
-/* ---------- Migração (manual) ---------- */
-function legacyExists(){
-  if(lsGet(LEG_MAIN_KEY)) return true;
-  for(let y=2025; y<=2030; y++){
-    for(let m=0; m<12; m++){
-      const id = `${m}_${y}`;
-      if(lsGet(LEG_DETAILS_PREFIX + id) || lsGet(LEG_CFG_PREFIX + id)) return true;
-    }
-  }
-  return false;
-}
-
-function migrateLegacyToV9(){
-  if(lsGet(DB_KEY)) return;
-
-  const newDB = { version: 10, categories: [...defaultCats], months: {} };
-
-  // 1) Diário legado
-  for(let y=2025; y<=2030; y++){
-    for(let m=0; m<12; m++){
-      const id = `${m}_${y}`;
-      const cfgRaw = lsGet(LEG_CFG_PREFIX + id);
-      const detRaw = lsGet(LEG_DETAILS_PREFIX + id);
-      if(!cfgRaw && !detRaw) continue;
-
-      const k = monthKey(y,m);
-      newDB.months[k] = newDB.months[k] || {
-        cfg: { startBalance: 0, weekendFactor: 1 },
-        incomes: { adiant: 0, sal: 0, extras: [] },
-        expenses: { fixed: [], cards: [] },
-        notes: "",
-        txByDay: {},
-        manualDaily: {}
-      };
-
-      if(cfgRaw){
-        try{
-          const cfg = JSON.parse(cfgRaw);
-          newDB.months[k].cfg.startBalance = Number(cfg.start)||0;
-          newDB.months[k].cfg.weekendFactor = Number(cfg.weekendFactor)||1;
-        }catch{}
-      }
-
-      if(detRaw){
-        try{
-          const details = JSON.parse(detRaw) || {};
-          Object.keys(details).forEach(day=>{
-            const list = details[day] || [];
-            newDB.months[k].txByDay[String(day)] = list.map(tx=>({
-              id: tx.id || uid(),
-              val: Number(tx.val)||0,
-              type: tx.type || 'saida',
-              cat: tx.cat || 'Outros',
-              method: tx.method || 'Pix',
-              desc: tx.desc || '',
-              isPig: !!tx.isPig,
-              ts: tx.ts || Date.now()
-            }));
-          });
-        }catch{}
-      }
-    }
-  }
-
-  // 2) Mensal legado (financeDB_v8)
-  const v8raw = lsGet(LEG_MAIN_KEY);
-  if(v8raw){
-    try{
-      const v8 = JSON.parse(v8raw) || {};
-      for(let m=0; m<12; m++){
-        if(!v8[m]) continue;
-        const k = monthKey(2026, m);
-        newDB.months[k] = newDB.months[k] || {
-          cfg: { startBalance: 0, weekendFactor: 1 },
-          incomes: { adiant: 0, sal: 0, extras: [] },
-          expenses: { fixed: [], cards: [] },
-          notes: "",
-          txByDay: {},
-          manualDaily: {}
-        };
-        const src = v8[m];
-        newDB.months[k].incomes.adiant = Number(src.adiant)||0;
-        newDB.months[k].incomes.sal = Number(src.sal)||0;
-        newDB.months[k].incomes.extras = (src.extraIncomes||[]).map(x=>({ desc: x.desc||'Extra', val: Number(x.val)||0 }));
-        newDB.months[k].expenses.cards = (src.cards||[]).map(x=>({ desc: x.desc||'Cartão', val: Number(x.val)||0 }));
-        newDB.months[k].expenses.fixed = (src.fixed||[]).map(x=>({ desc: x.desc||'Fixa', val: Number(x.val)||0, paid: !!x.paid }));
-        newDB.months[k].notes = src.notes || '';
-
-        // merge daily fixo do legado
-        if(Array.isArray(src.daily)){
-          src.daily.forEach((v, idx)=>{
-            const d = idx+1;
-            const existingList = newDB.months[k].txByDay[String(d)];
-            if(!existingList || !existingList.length){
-              if(Number(v)) newDB.months[k].manualDaily[String(d)] = Number(v);
-            }
-          });
-        }
-      }
-    }catch{}
-  }
-
-  lsSet(DB_KEY, JSON.stringify(newDB));
-}
-
-/* ---------- Export / Import ---------- */
-function exportV9(){
-  saveDB();
-  const txt = JSON.stringify(state.db, null, 2);
-  const blob = new Blob([txt], {type:'application/json'});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `FINAPP_DB_V10_${monthKey(state.year, state.month)}.json`;
-  a.click();
-}
-
+function exportV9(){ saveDB(); const b=new Blob([JSON.stringify(state.db,null,2)],{type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download=`FINAPP_BKP_${monthKey(state.year,state.month)}.json`; a.click(); }
 function importV9(){
-  const input = document.createElement('input');
-  input.type = 'file';
-  input.accept = '.json,application/json';
-  input.onchange = e=>{
-    const file = e.target.files[0];
-    if(!file) return;
-    const r = new FileReader();
-    r.onload = ev=>{
-      try{
-        const obj = JSON.parse(ev.target.result);
-        if(!obj || !obj.months) throw new Error('invalid');
-        lsSet(DB_KEY, JSON.stringify(obj));
-        location.reload();
-      }catch{
-        alert('Backup inválido ou incompatível.');
-      }
-    };
-    r.readAsText(file);
-  };
-  input.click();
+  const i=document.createElement('input'); i.type='file'; i.accept='.json';
+  i.onchange=e=>{ const f=e.target.files[0]; if(!f)return; const r=new FileReader(); r.onload=ev=>{ try{ const o=JSON.parse(ev.target.result); if(!o||!o.months)throw 0; lsSet(DB_KEY,JSON.stringify(o)); location.reload(); }catch{alert('Erro no arquivo');} }; r.readAsText(f); }; i.click();
 }
 
-/* ---------- UI Bindings ---------- */
 function setupSelectors(){
-  const selY = document.getElementById('selYear');
-  const selM = document.getElementById('selMonth');
-
-  selY.innerHTML = '';
-  for(let y=2025; y<=2030; y++){
-    const opt = document.createElement('option');
-    opt.value = String(y);
-    opt.textContent = String(y);
-    selY.appendChild(opt);
-  }
-  selY.value = String(state.year);
-
-  selM.innerHTML = monthsPT.map((m,i)=>`<option value="${i}">${m}</option>`).join('');
-  selM.value = String(state.month);
-
-  selY.onchange = ()=>{ state.year = Number(selY.value); renderAll(); };
-  selM.onchange = ()=>{ state.month = Number(selM.value); renderAll(); };
+  const sy=document.getElementById('selYear'), sm=document.getElementById('selMonth');
+  sy.innerHTML=''; for(let y=2025;y<=2030;y++) sy.add(new Option(y,y)); sy.value=state.year;
+  sm.innerHTML=monthsPT.map((m,i)=>`<option value="${i}">${m}</option>`).join(''); sm.value=state.month;
+  sy.onchange=()=>{state.year=Number(sy.value);renderAll();}; sm.onchange=()=>{state.month=Number(sm.value);renderAll();};
 }
-
 function setupTabs(){
-  const tabDaily = document.getElementById('tabDaily');
-  const tabMonthly = document.getElementById('tabMonthly');
-  const vDaily = document.getElementById('viewDaily');
-  const vMonthly = document.getElementById('viewMonthly');
-
-  tabDaily.onclick = ()=>{
-    tabDaily.classList.add('active'); tabMonthly.classList.remove('active');
-    vDaily.style.display = ''; vMonthly.style.display='none';
-    renderDaily();
-  };
-  tabMonthly.onclick = ()=>{
-    tabMonthly.classList.add('active'); tabDaily.classList.remove('active');
-    vMonthly.style.display = ''; vDaily.style.display='none';
-    renderMonthly();
-  };
+  const td=document.getElementById('tabDaily'), tm=document.getElementById('tabMonthly'), vd=document.getElementById('viewDaily'), vm=document.getElementById('viewMonthly');
+  td.onclick=()=>{td.classList.add('active');tm.classList.remove('active');vd.style.display='';vm.style.display='none';renderDaily();};
+  tm.onclick=()=>{tm.classList.add('active');td.classList.remove('active');vm.style.display='';vd.style.display='none';renderMonthly();};
 }
-
 function setupDailyConfig(){
-  const inp = document.getElementById('inpStartBalance');
-  const sel = document.getElementById('selWeekendFactor');
-  const btn = document.getElementById('btnUseMonthlySobra');
-
-  inp.onchange = ()=>{
-    const model = getMonth();
-    model.cfg.startBalance = Number(inp.value)||0;
-    saveDB(); renderDaily();
-  };
-  sel.onchange = ()=>{
-    const model = getMonth();
-    model.cfg.weekendFactor = Number(sel.value)||1;
-    saveDB(); renderDaily();
-  };
-  btn.onclick = ()=>{
-    const model = getMonth();
-    const s = buildMonthlySummary(model);
-    model.cfg.startBalance = Math.max(0, s.income - s.fixed);
-    saveDB(); renderDaily();
-  };
-
-  document.getElementById('btnGoToday').onclick = ()=>{
-    const today = new Date();
-    if(today.getFullYear()!==state.year || today.getMonth()!==state.month){
-      alert('Você não está no mês atual.');
-      return;
-    }
-    const el = document.querySelector('tr.today');
-    if(el) el.scrollIntoView({behavior:'smooth', block:'center'});
+  const i=document.getElementById('inpStartBalance'), s=document.getElementById('selWeekendFactor'), b=document.getElementById('btnUseMonthlySobra');
+  i.onchange=()=>{getMonth().cfg.startBalance=Number(i.value)||0;saveDB();renderDaily();};
+  s.onchange=()=>{getMonth().cfg.weekendFactor=Number(s.value)||1;saveDB();renderDaily();};
+  b.onclick=()=>{const m=getMonth(), sm=buildMonthlySummary(m); m.cfg.startBalance=Math.max(0,sm.income-sm.fixed); saveDB();renderDaily();};
+  document.getElementById('btnGoToday').onclick=()=>{
+    const t=new Date(); if(t.getFullYear()!==state.year||t.getMonth()!==state.month){alert('Mês errado');return;}
+    const el=document.querySelector('tr.today'); if(el)el.scrollIntoView({behavior:'smooth',block:'center'});
   };
 }
 
-/* ---------- Collapsible Sections ---------- */
-function setupCollapsibles(){
-  document.querySelectorAll('.section-bar').forEach(bar => {
-    bar.addEventListener('click', (e) => {
-      // Evita fechar se clicar num botão dentro da barra (ex: "Hoje")
-      if(e.target.tagName === 'BUTTON' || e.target.closest('button')) return;
-      
-      const section = bar.parentElement;
-      section.classList.toggle('collapsed');
-    });
-  });
-}
-
-/* ---------- CATS MANAGER ---------- */
-function openCatModal(){
-    document.getElementById('modalCats').classList.add('active');
-    renderCatManager();
-}
-
+function openCatModal(){ document.getElementById('modalCats').classList.add('active'); renderCatManager(); }
 function renderCatManager(){
-    const list = state.db.categories || [];
-    const container = document.getElementById('catListContainer');
-    container.innerHTML = list.map((cat, i) => `
-        <div class="cat-list-item">
-            <span>${escapeHtml(cat)}</span>
-            <button class="btn danger" onclick="deleteCat(${i})">🗑️</button>
-        </div>
-    `).join('');
+    document.getElementById('catListContainer').innerHTML=(state.db.categories||[]).map((c,i)=>`<div class="cat-list-item"><span>${escapeHtml(c)}</span><button class="btn danger" onclick="delCat(${i})">🗑️</button></div>`).join('');
 }
-
 function addCat(){
-    const input = document.getElementById('newCatName');
-    const val = input.value.trim();
-    if(!val) return;
-    if(state.db.categories.includes(val)){
-        alert('Categoria já existe!'); return;
-    }
-    state.db.categories.push(val);
-    saveDB();
-    input.value = '';
-    renderCatManager();
+    const v=document.getElementById('newCatName').value.trim();
+    if(v && !state.db.categories.includes(v)){ state.db.categories.push(v); saveDB(); document.getElementById('newCatName').value=''; renderCatManager(); }
 }
+window.delCat=(i)=>{if(confirm('Excluir cat?')){state.db.categories.splice(i,1);saveDB();renderCatManager();}};
 
-function deleteCat(idx){
-    if(!confirm('Excluir categoria? (Transações antigas não mudam)')) return;
-    state.db.categories.splice(idx, 1);
-    saveDB();
-    renderCatManager();
-}
-
-// Atualiza o <select> do modal diário
-function updateCatSelect(){
-    const sel = document.getElementById('txCat');
-    const cats = state.db.categories || [];
-    sel.innerHTML = cats.map(c => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('');
-}
-
-/* ---------- Daily modal ---------- */
-function openDayModal(day){
-  state.editing.day = day;
-  state.editing.txId = null;
-  const model = getMonth();
-  const list = model.txByDay[String(day)] || [];
-
-  document.getElementById('modalDayLabel').textContent = String(day).padStart(2,'0');
-  document.getElementById('modalMonthLabel').textContent = `${monthsPT[state.month]} / ${state.year}`;
-  
-  // Atualiza as categorias antes de abrir
-  updateCatSelect();
-  
+function openDayModal(d){
+  state.editing.day=d; state.editing.txId=null;
+  document.getElementById('modalDayLabel').textContent=pad2(d); document.getElementById('modalMonthLabel').textContent=`${monthsPT[state.month]}/${state.year}`;
+  const sel=document.getElementById('txCat'); sel.innerHTML=(state.db.categories||[]).map(c=>`<option>${escapeHtml(c)}</option>`).join('');
   document.getElementById('modalDay').classList.add('active');
-
-  resetTxForm();
-  renderTxList(list);
+  resetTxForm(); renderTxList(getMonth().txByDay[String(d)]||[]);
 }
-
-function closeDayModal(){
-  document.getElementById('modalDay').classList.remove('active');
-  state.editing.day = null;
-  state.editing.txId = null;
-  renderDaily();
+function closeDayModal(){ document.getElementById('modalDay').classList.remove('active'); renderDaily(); }
+function resetTxForm(){ document.getElementById('formTitle').textContent='Novo'; document.getElementById('txVal').value=''; document.getElementById('txDesc').value=''; document.getElementById('txPig').checked=false; document.getElementById('btnCancelEdit').style.display='none'; state.editing.txId=null; }
+function renderTxList(l){
+  const b=document.getElementById('txList');
+  if(!l||!l.length){ b.innerHTML='<div class="muted" style="text-align:center;padding:10px">Vazio</div>'; return; }
+  b.innerHTML=l.map(x=>`<div class="tx-item"><div><b style="color:${x.type==='entrada'?'var(--primary)':'#fff'}">${x.type==='entrada'?'+':'-'} ${money(x.val)}</b><div class="tx-meta">${x.cat} ${x.isPig?'(🐷)':''}</div>${x.desc?`<div>${escapeHtml(x.desc)}</div>`:''}</div><div class="tx-actions"><button class="edit" onclick="editTx('${x.id}')">✏️</button><button class="del" onclick="delTx('${x.id}')">🗑️</button></div></div>`).join('');
 }
-
-function resetTxForm(){
-  document.getElementById('formTitle').textContent = 'Novo lançamento';
-  document.getElementById('txVal').value = '';
-  document.getElementById('txDesc').value = '';
-  document.getElementById('txPig').checked = false;
-  document.getElementById('btnCancelEdit').style.display = 'none';
-  state.editing.txId = null;
-}
-
-function renderTxList(list){
-  const box = document.getElementById('txList');
-  if(!list || !list.length){
-    box.innerHTML = '<div class="muted" style="text-align:center;padding:10px">Nenhuma transação neste dia.</div>';
-    return;
-  }
-  box.innerHTML = list.map(tx=>{
-    const isE = tx.type === 'entrada';
-    const c = isE ? 'var(--primary)' : '#fff';
-    const s = isE ? '+' : '-';
-    // Se a categoria da transação não existe mais na lista, mostra ela mesmo assim
-    return `
-      <div class="tx-item">
-        <div>
-          <b style="color:${c}">${s} ${money(tx.val)}</b>
-          <div class="tx-meta">
-            ${tx.cat} • ${tx.method} ${tx.isPig?' <span class="pill" style="color:#e91e63;border-color:#e91e63">🐷 Pig</span>':''}
-          </div>
-          ${tx.desc ? `<div>${escapeHtml(tx.desc)}</div>` : ''}
-        </div>
-        <div class="tx-actions">
-          <button class="edit" data-edit="${tx.id}">✏️</button>
-          <button class="del" data-del="${tx.id}">🗑️</button>
-        </div>
-      </div>`;
-  }).join('');
-
-  box.querySelectorAll('[data-edit]').forEach(btn=>{
-    btn.onclick = ()=> startEditTx(btn.getAttribute('data-edit'));
-  });
-  box.querySelectorAll('[data-del]').forEach(btn=>{
-    btn.onclick = ()=> deleteTx(btn.getAttribute('data-del'));
-  });
-}
-
-function startEditTx(txId){
-  const model = getMonth();
-  const day = state.editing.day;
-  const list = model.txByDay[String(day)] || [];
-  const tx = list.find(x=>x.id===txId);
-  if(!tx) return;
-
-  state.editing.txId = txId;
-  document.getElementById('formTitle').textContent = 'Editando lançamento';
-  document.getElementById('txType').value = tx.type;
-  document.getElementById('txVal').value = String(tx.val);
-  
-  // Tenta selecionar a categoria. Se ela foi excluída, adiciona temporariamente ao select pra não dar erro visual
-  const selCat = document.getElementById('txCat');
-  if(![...selCat.options].some(o=>o.value === tx.cat)){
-      const opt = document.createElement('option');
-      opt.value = tx.cat;
-      opt.textContent = tx.cat + ' (Arquivada)';
-      selCat.appendChild(opt);
-  }
-  selCat.value = tx.cat;
-
-  document.getElementById('txMethod').value = tx.method;
-  document.getElementById('txDesc').value = tx.desc || '';
-  document.getElementById('txPig').checked = !!tx.isPig;
-  document.getElementById('btnCancelEdit').style.display = '';
-}
-
-function deleteTx(txId){
-  if(!confirm('Excluir este lançamento?')) return;
-  const model = getMonth();
-  const day = state.editing.day;
-  const list = model.txByDay[String(day)] || [];
-  model.txByDay[String(day)] = list.filter(x=>x.id!==txId);
-  saveDB();
-  renderTxList(model.txByDay[String(day)] || []);
-  resetTxForm();
-}
+window.editTx=(id)=>{
+  const tx=(getMonth().txByDay[String(state.editing.day)]||[]).find(x=>x.id===id); if(!tx)return;
+  state.editing.txId=id; document.getElementById('formTitle').textContent='Editar';
+  document.getElementById('txType').value=tx.type; document.getElementById('txVal').value=tx.val; document.getElementById('txMethod').value=tx.method; document.getElementById('txDesc').value=tx.desc||''; document.getElementById('txPig').checked=!!tx.isPig; document.getElementById('btnCancelEdit').style.display='';
+  const sel=document.getElementById('txCat'); if(![...sel.options].some(o=>o.value===tx.cat)) sel.add(new Option(tx.cat,tx.cat)); sel.value=tx.cat;
+};
+window.delTx=(id)=>{ if(confirm('Apagar?')){ const m=getMonth(), d=String(state.editing.day); m.txByDay[d]=m.txByDay[d].filter(x=>x.id!==id); saveDB(); renderTxList(m.txByDay[d]); resetTxForm(); } };
 
 function saveTx(){
-  const model = getMonth();
-  const day = state.editing.day;
-
-  let amount;
-  try{
-    amount = parseAmount(document.getElementById('txVal').value);
-  }catch{
-    alert('Valor inválido.'); return;
-  }
-
-  const tx = {
-    id: state.editing.txId || uid(),
-    val: Math.abs(Number(amount)||0),
-    type: document.getElementById('txType').value,
-    cat: document.getElementById('txCat').value,
-    method: document.getElementById('txMethod').value,
-    desc: document.getElementById('txDesc').value || '',
-    isPig: !!document.getElementById('txPig').checked,
-    ts: Date.now()
-  };
-
-  model.txByDay[String(day)] = model.txByDay[String(day)] || [];
-  if(state.editing.txId){
-    const idx = model.txByDay[String(day)].findIndex(x=>x.id===state.editing.txId);
-    if(idx>=0) model.txByDay[String(day)][idx] = tx;
-  } else {
-    model.txByDay[String(day)].push(tx);
-  }
-
-  delete model.manualDaily[String(day)];
-  saveDB();
-  renderTxList(model.txByDay[String(day)]);
-  resetTxForm();
+  const m=getMonth(), d=String(state.editing.day); let amt; try{amt=parseAmount(document.getElementById('txVal').value);}catch{alert('Valor err');return;}
+  const tx={ id:state.editing.txId||uid(), val:Math.abs(amt), type:document.getElementById('txType').value, cat:document.getElementById('txCat').value, method:document.getElementById('txMethod').value, desc:document.getElementById('txDesc').value||'', isPig:document.getElementById('txPig').checked, ts:Date.now() };
+  if(!m.txByDay[d]) m.txByDay[d]=[];
+  if(state.editing.txId){ const i=m.txByDay[d].findIndex(x=>x.id===state.editing.txId); if(i>=0)m.txByDay[d][i]=tx; } else m.txByDay[d].push(tx);
+  delete m.manualDaily[d]; saveDB(); renderTxList(m.txByDay[d]); resetTxForm();
 }
 
 function setupModal(){
-  document.getElementById('btnCloseModal').onclick = closeDayModal;
-  document.getElementById('btnSaveTx').onclick = saveTx;
-  document.getElementById('btnCancelEdit').onclick = ()=>{
-    state.editing.txId = null;
-    resetTxForm();
-  };
-  
-  // Manager cats
-  document.getElementById('btnAddCat').onclick = addCat;
+  document.getElementById('btnCloseModal').onclick=closeDayModal; document.getElementById('btnSaveTx').onclick=saveTx;
+  document.getElementById('btnCancelEdit').onclick=()=>{state.editing.txId=null;resetTxForm();};
+  document.getElementById('btnAddCat').onclick=addCat;
+  document.getElementById('modalCats').addEventListener('click',e=>{if(e.target.id==='modalCats')document.getElementById('modalCats').classList.remove('active');});
 }
 
-/* ---------- Monthly inputs ---------- */
 function setupMonthly(){
-  const inpAd = document.getElementById('inpAdiant');
-  const inpSa = document.getElementById('inpSal');
-  const txtNotes = document.getElementById('txtNotes');
-
-  const updateInp = ()=>{
-    const model = getMonth();
-    model.incomes.adiant = Number(inpAd.value)||0;
-    model.incomes.sal = Number(inpSa.value)||0;
-    saveDB(); renderMonthly();
-  };
-  inpAd.onchange = updateInp; inpSa.onchange = updateInp;
-
-  txtNotes.onchange = ()=>{
-    getMonth().notes = txtNotes.value || '';
-    saveDB();
-  };
-
-  document.getElementById('btnAddExtra').onclick = ()=>{
-    getMonth().incomes.extras.push({desc:'Novo', val:0});
-    saveDB(); renderMonthly();
-  };
-  document.getElementById('btnAddFixed').onclick = ()=>{
-    getMonth().expenses.fixed.push({desc:'Nova', val:0, paid:false});
-    saveDB(); renderMonthly();
-  };
-  document.getElementById('btnAddCard').onclick = ()=>{
-    getMonth().expenses.cards.push({desc:'Cartão', val:0});
-    saveDB(); renderMonthly();
-  };
+  const ia=document.getElementById('inpAdiant'), is=document.getElementById('inpSal'), tn=document.getElementById('txtNotes');
+  const up=()=>{ getMonth().incomes.adiant=Number(ia.value)||0; getMonth().incomes.sal=Number(is.value)||0; saveDB(); renderMonthly(); };
+  ia.onchange=up; is.onchange=up; tn.onchange=()=>{getMonth().notes=tn.value;saveDB();};
+  document.getElementById('btnAddExtra').onclick=()=>{getMonth().incomes.extras.push({desc:'Novo',val:0});saveDB();renderMonthly();};
+  document.getElementById('btnAddFixed').onclick=()=>{getMonth().expenses.fixed.push({desc:'Nova',val:0,paid:false});saveDB();renderMonthly();};
+  document.getElementById('btnAddCard').onclick=()=>{getMonth().expenses.cards.push({desc:'Cartão',val:0});saveDB();renderMonthly();};
 }
 
-function renderTableDynamic(tbodyId, list, typeKey){
-  const tb = document.getElementById(tbodyId);
-  tb.innerHTML = '';
-  (list||[]).forEach((item, i)=>{
-    const tr = document.createElement('tr');
-    let html = '';
-    if(typeKey === 'fixed'){
-      html += `<td style="vertical-align:middle; text-align:center"><input type="checkbox" ${item.paid?'checked':''} data-i="${i}" class="m-chk" style="width:auto; margin:0"></td>`;
-    }
-    html += `
-      <td><input type="text" value="${escapeHtml(item.desc)}" data-i="${i}" class="m-desc" ${item.paid?'style="text-decoration:line-through;opacity:0.6"':''} /></td>
-      <td><input type="number" step="0.01" value="${item.val}" data-i="${i}" class="m-val" /></td>
-      <td style="vertical-align:middle;text-align:right"><button class="btn danger m-del" data-i="${i}" style="padding:4px 8px; font-size:0.8rem">X</button></td>
-    `;
-    tr.innerHTML = html;
+function renderTableDynamic(id,list,k){
+  const tb=document.getElementById(id); tb.innerHTML='';
+  list.forEach((x,i)=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML=`${k==='fixed'?`<td style="vertical-align:middle;text-align:center"><input type="checkbox" ${x.paid?'checked':''} onchange="updList('${k}',${i},'paid',this.checked)" style="width:auto;margin:0"></td>`:''}<td><input type="text" value="${escapeHtml(x.desc)}" onchange="updList('${k}',${i},'desc',this.value)" class="m-desc" ${x.paid?'style="text-decoration:line-through;opacity:0.6"':''}></td><td><input type="number" step="0.01" value="${x.val}" onchange="updList('${k}',${i},'val',this.value)" class="m-val"></td><td style="text-align:right"><button class="btn danger" onclick="delList('${k}',${i})" style="padding:4px 8px;font-size:0.8rem">X</button></td>`;
     tb.appendChild(tr);
   });
-
-  tb.querySelectorAll('.m-chk').forEach(c=>{
-    c.onchange = ()=>{
-      list[Number(c.getAttribute('data-i'))].paid = !!c.checked;
-      saveDB(); renderMonthly();
-    };
-  });
-  tb.querySelectorAll('.m-desc').forEach(i=>{
-    i.onchange = ()=>{
-      list[Number(i.getAttribute('data-i'))].desc = i.value;
-      saveDB();
-    };
-  });
-  tb.querySelectorAll('.m-val').forEach(i=>{
-    i.onchange = ()=>{
-      list[Number(i.getAttribute('data-i'))].val = Number(i.value)||0;
-      saveDB(); renderMonthly();
-    };
-  });
-  tb.querySelectorAll('.m-del').forEach(b=>{
-    b.onclick = ()=>{
-      if(!confirm('Apagar item?')) return;
-      list.splice(Number(b.getAttribute('data-i')), 1);
-      saveDB(); renderMonthly();
-    };
-  });
 }
+window.updList=(k,i,f,v)=>{ const l=k==='extras'?getMonth().incomes.extras:(k==='fixed'?getMonth().expenses.fixed:getMonth().expenses.cards); l[i][f]=f==='val'?Number(v)||0:v; saveDB(); renderMonthly(); };
+window.delList=(k,i)=>{ if(confirm('Apagar?')){ const l=k==='extras'?getMonth().incomes.extras:(k==='fixed'?getMonth().expenses.fixed:getMonth().expenses.cards); l.splice(i,1); saveDB(); renderMonthly(); } };
 
-/* ---------- Rendering Core ---------- */
 function renderDaily(){
-  const model = getMonth();
+  const m=getMonth(); document.getElementById('inpStartBalance').value=m.cfg.startBalance||''; document.getElementById('selWeekendFactor').value=m.cfg.weekendFactor||1;
+  const {metas,totals,saldo}=computeDailyMetaAndSaldo(m);
+  const dim=daysInMonth(state.year,state.month);
+  const today=new Date(); const isCur=(today.getFullYear()===state.year&&today.getMonth()===state.month);
+  
+  if(isCur && today.getDate()<=dim){
+    const d=today.getDate(); const w=(today.getDay()===0||today.getDay()===6);
+    document.getElementById('dailyMeta').textContent=money(metas[d-1]);
+    document.getElementById('dailyMetaHint').textContent=(w&&m.cfg.weekendFactor>1)?`🍹 Finde (${m.cfg.weekendFactor}x)`:'';
+  } else { document.getElementById('dailyMeta').textContent='—'; document.getElementById('dailyMetaHint').textContent=''; }
+  document.getElementById('dailySaldo').textContent=money(saldo);
 
-  document.getElementById('inpStartBalance').value = model.cfg.startBalance || '';
-  document.getElementById('selWeekendFactor').value = model.cfg.weekendFactor || '1';
-
-  // 1) Meta e Saldo
-  const { metas, totals, saldo } = computeDailyMetaAndSaldo(model);
-  const dim = daysInMonth(state.year, state.month);
-
-  const today = new Date();
-  let todayMeta = 0;
-  let todayIsWeekend = false;
-  if(today.getFullYear()===state.year && today.getMonth()===state.month){
-    const d = today.getDate();
-    if(d>=1 && d<=dim){
-      todayMeta = metas[d-1];
-      todayIsWeekend = (today.getDay()===0 || today.getDay()===6);
-    }
-  }
-
-  document.getElementById('dailyMeta').textContent = money(todayMeta);
-  document.getElementById('dailyMetaHint').textContent = (todayIsWeekend && Number(model.cfg.weekendFactor)>1) ? `🍹 Modo finde ativo (${model.cfg.weekendFactor}x)` : '';
-  document.getElementById('dailySaldo').textContent = money(saldo);
-
-  // 2) Tabela e Gráfico Diário
-  const tbody = document.getElementById('dailyTable');
-  tbody.innerHTML = '';
-
-  const labels = [];
-  const data = [];
-  const colors = [];
-
-  const isCurrentMonth = (today.getFullYear()===state.year && today.getMonth()===state.month);
-
+  const tb=document.getElementById('dailyTable'); tb.innerHTML='';
+  const labels=[], data=[], colors=[];
+  
   for(let d=1; d<=dim; d++){
-    const dateObj = new Date(state.year, state.month, d);
-    const isWeekend = (dateObj.getDay()===0 || dateObj.getDay()===6);
-
-    const list = model.txByDay[String(d)] || [];
-    const hasTx = list.length>0;
-    const total = hasTx ? dayTotalFromTx(list) : Number(model.manualDaily[String(d)]||0);
-    const meta = metas[d-1] || 0;
-    const obs = hasTx ? dayObsFromTx(list) : '';
-    const isToday = isCurrentMonth && d===today.getDate();
-
-    const diff = meta - total;
-    const isOver = diff < 0; // Se gastou mais que a meta
-    const statusColor = (!hasTx && total===0) ? '#444' : (isOver ? '#e74c3c' : '#2ecc71');
-    const statusLabel = (!hasTx && total===0) ? '—' : (isOver ? 'Excedeu' : 'OK');
-
-    labels.push(d);
-    data.push(hasTx || total!==0 ? total : null);
-    colors.push((total > meta*1.1) ? '#e74c3c' : (isWeekend ? '#9b59b6' : '#2ecc71'));
-
-    const tr = document.createElement('tr');
-    tr.id = `day-${d}`;
-    tr.className = `${isWeekend?'row-weekend':''} ${isToday?'today':''}`.trim();
-    tr.innerHTML = `
-      <td style="white-space:nowrap;font-weight:800;color:#aaa">
-        ${String(d).padStart(2,'0')}/${pad2(state.month+1)}
-        ${isWeekend?'🍹':''}
-        <span class="pill" style="border-color:${statusColor};color:${statusColor}">${statusLabel}</span>
-      </td>
-      <td style="font-weight:800;color:${isWeekend?'var(--weekend)':'var(--accent)'}">${money(meta)}</td>
+    const dt=new Date(state.year,state.month,d); const w=(dt.getDay()===0||dt.getDay()===6);
+    const list=m.txByDay[String(d)]||[]; const hasTx=list.length>0;
+    const total=hasTx?dayTotalFromTx(list):Number(m.manualDaily[String(d)]||0);
+    const meta=metas[d-1]||0; const obs=hasTx?dayObsFromTx(list):'';
+    const isOver=(meta-total)<0;
+    const stC=(!hasTx&&total===0)?'#444':(isOver?'#e74c3c':'#2ecc71');
+    const stL=(!hasTx&&total===0)?'—':(isOver?'Excedeu':'OK');
+    
+    labels.push(d); data.push((hasTx||total!==0)?total:null); colors.push((total>meta*1.1)?'#e74c3c':(w?'#9b59b6':'#2ecc71'));
+    
+    const tr=document.createElement('tr');
+    if(isCur&&d===today.getDate()) tr.classList.add('today'); if(w) tr.classList.add('row-weekend');
+    tr.innerHTML=`
+      <td style="white-space:nowrap;font-weight:800;color:#aaa">${pad2(d)} ${w?'🍹':''} <span class="pill" style="border-color:${stC};color:${stC}">${stL}</span></td>
+      <td style="font-weight:800;color:${w?'var(--weekend)':'var(--accent)'}">${money(meta)}</td>
+      <td><button class="btn ${hasTx?'primary':''}" onclick="openDayModal(${d})" style="width:100%">${hasTx?money(total):(total!==0?money(total)+'*':'+')}</button></td>
       <td>
-        <button class="btn ${hasTx?'primary':''}" data-open="${d}" style="width:100%">
-          ${hasTx ? money(total) : (total!==0 ? `${money(total)} (manual)` : '+ Lançar')}
-        </button>
+         <div class="obs-cell-wrap" onclick="this.classList.toggle('expanded')">
+            ${escapeHtml(obs||(total!==0?'Manual':'—'))}
+         </div>
       </td>
-      <td class="muted">${escapeHtml(obs || (total!==0 ? 'Manual (sem transações)' : '—'))}</td>
     `;
-    tbody.appendChild(tr);
+    tb.appendChild(tr);
   }
 
-  tbody.querySelectorAll('[data-open]').forEach(b=>{
-    b.onclick = ()=> openDayModal(Number(b.getAttribute('data-open')));
-  });
-
-  const cv = document.getElementById('chartDaily');
-  if(cv && cv.getContext && hasChart()){
-    const ctx = cv.getContext('2d');
-    safeDestroy(charts.daily);
-    charts.daily = new Chart(ctx, {
-      type: 'bar',
-      data: {
-        labels,
-        datasets: [{ data, backgroundColor: colors, borderRadius: 4 }]
-      },
-      options: {
-        responsive:true, maintainAspectRatio:false,
-        plugins:{ legend:{ display:false } },
-        scales:{ 
-          y:{ grid:{ color:'#333' } }, 
-          x:{ 
-            grid:{ display:false },
-            ticks: { autoSkip: false, maxRotation: 90, minRotation: 0, font:{size:10} }
-          } 
-        }
-      }
-    });
+  if(hasChart()){
+    const ctx=document.getElementById('chartDaily').getContext('2d'); safeDestroy(charts.daily);
+    charts.daily=new Chart(ctx,{type:'bar',data:{labels,datasets:[{data,backgroundColor:colors,borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{grid:{color:'#333'}},x:{grid:{display:false},ticks:{autoSkip:false,maxRotation:90,font:{size:10}}}}}});
+    
+    const s=buildMonthlySummary(m);
+    const cats=Object.keys(s.cats).sort((a,b)=>s.cats[b]-s.cats[a]); const vals=cats.map(c=>s.cats[c]);
+    const pieCtx=document.getElementById('chartDailyPie').getContext('2d'); safeDestroy(charts.dailyPie);
+    charts.dailyPie=new Chart(pieCtx,{type:'doughnut',data:{labels:cats,datasets:[{data:vals,backgroundColor:['#e74c3c','#f1c40f','#2ecc71','#3498db','#9b59b6','#e67e22','#1abc9c'],borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,layout:{padding:10},plugins:{legend:{display:false}}}});
+    
+    const tot=vals.reduce((a,b)=>a+b,0)||1;
+    document.getElementById('dailyRanking').innerHTML=cats.map((c,i)=>{
+      const v=vals[i]||0, p=(v/tot*100).toFixed(1);
+      return `<div style="display:flex;justify-content:space-between;border-bottom:1px solid #222;padding:6px 0;font-size:.85rem"><div>${c}</div><div><b>${money(v)}</b> <span class="muted">(${p}%)</span></div></div>`;
+    }).join('');
   }
-
-  // 3) NOVO: Ranking no Diário (usa a lógica do mensal)
-  const s = buildMonthlySummary(model);
-  const cats = Object.keys(s.cats).sort((a,b)=>s.cats[b]-s.cats[a]);
-  const vals = cats.map(c=>s.cats[c]);
-
-  const dailyPieCv = document.getElementById('chartDailyPie');
-  if(dailyPieCv && dailyPieCv.getContext && hasChart()){
-    const pieCtx = dailyPieCv.getContext('2d');
-    safeDestroy(charts.dailyPie);
-    charts.dailyPie = new Chart(pieCtx, {
-      type: 'doughnut',
-      data: {
-        labels: cats,
-        datasets:[{ data: vals, backgroundColor:['#e74c3c','#f1c40f','#2ecc71','#3498db','#9b59b6','#e67e22','#1abc9c'], borderWidth:0 }]
-      },
-      options: { 
-        responsive:true, 
-        maintainAspectRatio:false, 
-        layout: { padding: 10 }, 
-        plugins:{ legend:{ display:false } } 
-      }
-    });
-  }
-
-  const totalCat = vals.reduce((a,b)=>a+b,0) || 1;
-  document.getElementById('dailyRanking').innerHTML = cats.map((c,i)=>{
-    const v = vals[i]||0;
-    const pct = (v/totalCat*100).toFixed(1);
-    // Tenta achar ícone (primeiros 2 chars ou padrão)
-    let icon = c.substring(0,2);
-    if(!/\p{Emoji}/u.test(icon)) icon = '💸';
-
-    return `<div style="display:flex;justify-content:space-between;border-bottom:1px solid #222;padding:6px 0;font-size:.85rem">
-      <div>${c}</div>
-      <div><b>${money(v)}</b> <span class="muted">(${pct}%)</span></div>
-    </div>`;
-  }).join('');
 }
 
 function renderMonthly(){
-  const model = getMonth();
-
-  document.getElementById('inpAdiant').value = model.incomes.adiant || '';
-  document.getElementById('inpSal').value = model.incomes.sal || '';
-  document.getElementById('txtNotes').value = model.notes || '';
-
-  renderTableDynamic('tblExtras', model.incomes.extras, 'extras');
-  renderTableDynamic('tblFixed', model.expenses.fixed, 'fixed');
-  renderTableDynamic('tblCards', model.expenses.cards, 'cards');
-
-  const s = buildMonthlySummary(model);
-
-  document.getElementById('mIncome').textContent = money(s.income);
-  document.getElementById('mFixed').textContent = money(s.fixed);
-  document.getElementById('mDaily').textContent = money(s.dailyTotal);
-
-  const mSob = document.getElementById('mSobra');
-  mSob.textContent = money(s.sobra);
-  mSob.className = s.sobra < 0 ? 'negativo' : 'positivo';
-
-  // charts
-  const cardsSum = sumCards(model.expenses.cards);
-  const fixedOnly = sumFixed(model.expenses.fixed);
-  const daily = s.dailyTotal;
-  const sobra = Math.max(0, s.sobra);
-
-  const macroCv = document.getElementById('chartMacro');
-  if(macroCv && macroCv.getContext && hasChart()){
-    const macroCtx = macroCv.getContext('2d');
-    safeDestroy(charts.macro);
-    charts.macro = new Chart(macroCtx, {
-      type: 'doughnut',
-      data: {
-        labels:['Cartões','Fixas','Diário','Sobra'],
-        datasets:[{
-          data:[cardsSum, fixedOnly, daily, sobra],
-          backgroundColor:['#e74c3c','#2ecc71','#9b59b6','#333'],
-          borderWidth:0
-        }]
-      },
-      options: {
-        responsive:true, maintainAspectRatio:false,
-        plugins:{
-          legend:{ position:'bottom', labels:{ color:'#aaa', font:{size:10} } }
-        }
-      }
-    });
+  const m=getMonth(); document.getElementById('inpAdiant').value=m.incomes.adiant||''; document.getElementById('inpSal').value=m.incomes.sal||''; document.getElementById('txtNotes').value=m.notes||'';
+  renderTableDynamic('tblExtras',m.incomes.extras,'extras'); renderTableDynamic('tblFixed',m.expenses.fixed,'fixed'); renderTableDynamic('tblCards',m.expenses.cards,'cards');
+  const s=buildMonthlySummary(m);
+  document.getElementById('mIncome').textContent=money(s.income); document.getElementById('mFixed').textContent=money(s.fixed); document.getElementById('mDaily').textContent=money(s.dailyTotal);
+  const elS=document.getElementById('mSobra'); elS.textContent=money(s.sobra); elS.style.color=s.sobra<0?'#e74c3c':'#2ecc71';
+  
+  if(hasChart()){
+    const mc=document.getElementById('chartMacro').getContext('2d'); safeDestroy(charts.macro);
+    charts.macro=new Chart(mc,{type:'doughnut',data:{labels:['Fixo+Cartão','Diário','Sobra'],datasets:[{data:[s.fixed,s.dailyTotal,Math.max(0,s.sobra)],backgroundColor:['#e74c3c','#9b59b6','#333'],borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{color:'#aaa'}}}}});
+    const bc=document.getElementById('chartDailyBar').getContext('2d'); safeDestroy(charts.dailyBar);
+    charts.dailyBar=new Chart(bc,{type:'bar',data:{labels:s.bar.map((_,i)=>i+1),datasets:[{data:s.bar,backgroundColor:'#9b59b6',borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{display:false},x:{ticks:{color:'#444',font:{size:8},autoSkip:false}}}}});
   }
-
-  const barCv = document.getElementById('chartDailyBar');
-  if(barCv && barCv.getContext && hasChart()){
-    const barCtx = barCv.getContext('2d');
-    safeDestroy(charts.dailyBar);
-    charts.dailyBar = new Chart(barCtx, {
-      type: 'bar',
-      data: {
-        labels: s.bar.map((_,i)=>i+1),
-        datasets:[{ data: s.bar, backgroundColor:'#9b59b6', borderRadius:4 }]
-      },
-      options: {
-        responsive:true, maintainAspectRatio:false,
-        plugins:{ legend:{ display:false } },
-        scales:{ 
-          y:{ display:false }, 
-          x:{ 
-            ticks:{ color:'#444', font:{size:8}, autoSkip:false }
-          } 
-        }
-      }
-    });
-  }
-
-  // REMOVIDO: chartCats do mensal
-  // Mantém apenas o ranking em texto
-  const cats = Object.keys(s.cats).sort((a,b)=>s.cats[b]-s.cats[a]);
-  const vals = cats.map(c=>s.cats[c]);
-  const totalCat = vals.reduce((a,b)=>a+b,0) || 1;
-  document.getElementById('catRanking').innerHTML = cats.map((c,i)=>{
-    const v = vals[i]||0;
-    const pct = (v/totalCat*100).toFixed(1);
-    // Icone inteligente
-    let icon = c.substring(0,2);
-    if(!/\p{Emoji}/u.test(icon)) icon = '💸';
-    
-    return `<div style="display:flex;justify-content:space-between;border-bottom:1px solid #222;padding:6px 0;font-size:.85rem">
-      <div>${c}</div>
-      <div><b>${money(v)}</b> <span class="muted">(${pct}%)</span></div>
-    </div>`;
+  const cats=Object.keys(s.cats).sort((a,b)=>s.cats[b]-s.cats[a]); const vals=cats.map(c=>s.cats[c]); const tot=vals.reduce((a,b)=>a+b,0)||1;
+  document.getElementById('catRanking').innerHTML=cats.map((c,i)=>{
+    const v=vals[i]||0, p=(v/tot*100).toFixed(1);
+    return `<div style="display:flex;justify-content:space-between;border-bottom:1px solid #222;padding:6px 0;font-size:.85rem"><div>${c}</div><div><b>${money(v)}</b> <span class="muted">(${p}%)</span></div></div>`;
   }).join('');
 }
 
-/* ---------- Render all ---------- */
-function renderAll(){
-  ensureMonthModel(state.year, state.month);
-  renderDaily();
-  renderMonthly();
-}
-
-/* ---------- Migração aviso ---------- */
-function setupMigrationNotice(){
-  const notice = document.getElementById('migrationNotice');
-  const btnMig = document.getElementById('btnMigrate');
-  const btnDismiss = document.getElementById('btnDismissNotice');
-
-  if(!lsGet(DB_KEY) && legacyExists()){
-    notice.style.display = '';
-    btnMig.onclick = ()=>{
-      migrateLegacyToV9();
-      alert('Migração concluída! Recarregando...');
-      location.reload();
-    };
-    btnDismiss.onclick = ()=> notice.style.display = 'none';
-  }
-}
-
-/* ---------- Service worker register (somente via http/https) ---------- */
-function registerSW(){
-  if(location.protocol === 'http:' || location.protocol === 'https:'){
-    if('serviceWorker' in navigator){
-      navigator.serviceWorker.register('./service-worker.js').catch(()=>{});
+function renderAll(){ ensureMonthModel(state.year,state.month); renderDaily(); renderMonthly(); }
+function legacyExists(){ if(lsGet(LEG_MAIN_KEY))return true; for(let y=2025;y<=2030;y++)for(let m=0;m<12;m++)if(lsGet(LEG_DETAILS_PREFIX+`${m}_${y}`)||lsGet(LEG_CFG_PREFIX+`${m}_${y}`))return true; return false; }
+function migrateLegacyToV9(){
+  if(lsGet(DB_KEY))return; const n={version:10,categories:[...defaultCats],months:{}};
+  for(let y=2025;y<=2030;y++)for(let m=0;m<12;m++){
+    const k=monthKey(y,m), cr=lsGet(LEG_CFG_PREFIX+`${m}_${y}`), dr=lsGet(LEG_DETAILS_PREFIX+`${m}_${y}`);
+    if(cr||dr){ n.months[k]={cfg:{startBalance:0,weekendFactor:1},incomes:{adiant:0,sal:0,extras:[]},expenses:{fixed:[],cards:[]},notes:"",txByDay:{},manualDaily:{}};
+      if(cr)try{const c=JSON.parse(cr);n.months[k].cfg.startBalance=Number(c.start)||0;n.months[k].cfg.weekendFactor=Number(c.weekendFactor)||1;}catch{}
+      if(dr)try{const d=JSON.parse(dr);Object.keys(d).forEach(x=>{n.months[k].txByDay[x]=(d[x]||[]).map(t=>({id:t.id||uid(),val:Number(t.val)||0,type:t.type||'saida',cat:t.cat||'Outros',method:t.method||'Pix',desc:t.desc||'',isPig:!!t.isPig,ts:Date.now()}));});}catch{}
     }
   }
+  const vr=lsGet(LEG_MAIN_KEY);
+  if(vr)try{const v=JSON.parse(vr);for(let m=0;m<12;m++){if(v[m]){const k=monthKey(2026,m);if(!n.months[k])n.months[k]={cfg:{startBalance:0,weekendFactor:1},incomes:{adiant:0,sal:0,extras:[]},expenses:{fixed:[],cards:[]},notes:"",txByDay:{},manualDaily:{}}; const s=v[m]; n.months[k].incomes.adiant=Number(s.adiant)||0;n.months[k].incomes.sal=Number(s.sal)||0;n.months[k].incomes.extras=(s.extraIncomes||[]).map(x=>({desc:x.desc||'Ext',val:Number(x.val)||0}));n.months[k].expenses.cards=(s.cards||[]).map(x=>({desc:x.desc||'Card',val:Number(x.val)||0}));n.months[k].expenses.fixed=(s.fixed||[]).map(x=>({desc:x.desc||'Fix',val:Number(x.val)||0,paid:!!x.paid}));n.months[k].notes=s.notes||''; if(s.daily)s.daily.forEach((dv,di)=>{if(Number(dv)&&(!n.months[k].txByDay[String(di+1)]||!n.months[k].txByDay[String(di+1)].length))n.months[k].manualDaily[String(di+1)]=Number(dv);});}}}catch{}
+  lsSet(DB_KEY,JSON.stringify(n));
+}
+function setupMigrationNotice(){
+  if(!lsGet(DB_KEY)&&legacyExists()){ const n=document.getElementById('migrationNotice'); n.style.display=''; document.getElementById('btnMigrate').onclick=()=>{migrateLegacyToV9();location.reload();}; document.getElementById('btnDismissNotice').onclick=()=>n.style.display='none'; }
 }
 
-/* ---------- Init ---------- */
 (function init(){
-  state.db = loadDB();
-
-  setupSelectors();
-  setupTabs();
-  document.getElementById('btnExport').onclick = exportV9;
-  document.getElementById('btnImport').onclick = importV9;
-
-  setupDailyConfig();
-  setupCollapsibles();
-  setupModal();
-  setupMonthly();
-  setupMigrationNotice();
-
-  document.getElementById('modalDay').addEventListener('click', (e)=>{
-    if(e.target.id === 'modalDay') closeDayModal();
-  });
-  
-  // Cat Manager click outside
-  document.getElementById('modalCats').addEventListener('click', (e)=>{
-    if(e.target.id === 'modalCats') document.getElementById('modalCats').classList.remove('active');
-  });
-
-  registerSW();
+  state.db=loadDB(); setupSelectors(); setupTabs(); setupDailyConfig(); document.querySelectorAll('.section-bar').forEach(b=>b.addEventListener('click',e=>{if(!e.target.closest('button'))b.parentElement.classList.toggle('collapsed');}));
+  setupModal(); setupMonthly(); setupMigrationNotice();
+  document.getElementById('btnExport').onclick=exportV9; document.getElementById('btnImport').onclick=importV9;
+  if(location.protocol.startsWith('http')&&'serviceWorker'in navigator)navigator.serviceWorker.register('./service-worker.js').catch(()=>{});
   renderAll();
 })();
-
   </script>
 </body>
 </html>
