@@ -1,0 +1,1826 @@
+{
+  "version": 9,
+  "categories": [
+    "🛒 Mercado",
+    "🍔 Alimentacao",
+    "🚗 Transporte",
+    "🍺 Lazer",
+    "🏠 Casa",
+    "💊 Saude",
+    "✈️ Viagem",
+    "⚙️ Outros",
+    "🐷 Cofrinhos",
+    "🙌🏻 Doação",
+    "👰 Alline",
+    "🤱 Mãe"
+  ],
+  "cards": [
+    "Inter",
+    "XP",
+    "Mercado Pago",
+    "Itaú Signature"
+  ],
+  "pigsBanks": [
+    "Cofrinho Itaú",
+    "Desafio Itaú"
+  ],
+  "months": {
+    "2026-02": {
+      "cfg": {
+        "startBalance": 1677.39,
+        "weekendFactor": 3
+      },
+      "incomes": {
+        "adiant": 1677.39,
+        "sal": 2058.67,
+        "extras": [
+          {
+            "desc": "Férias Março",
+            "val": 7800.44
+          }
+        ]
+      },
+      "expenses": {
+        "fixed": [
+          {
+            "desc": "Consignado",
+            "val": 582.63,
+            "paid": true
+          },
+          {
+            "desc": "Energia",
+            "val": 202.91,
+            "paid": true
+          },
+          {
+            "desc": "Claro",
+            "val": 289.61,
+            "paid": true
+          },
+          {
+            "desc": "Casa Praia",
+            "val": 300,
+            "paid": true
+          },
+          {
+            "desc": "Luz Mãe ",
+            "val": 200,
+            "paid": true
+          },
+          {
+            "desc": "Compras Mãe ",
+            "val": 200,
+            "paid": true
+          },
+          {
+            "desc": "João (Aluguel)",
+            "val": 92,
+            "paid": true
+          },
+          {
+            "desc": "TotalPass",
+            "val": 89.9,
+            "paid": true
+          },
+          {
+            "desc": "Água Mãe ",
+            "val": 70,
+            "paid": true
+          },
+          {
+            "desc": "Ajuda ONGs",
+            "val": 50,
+            "paid": true
+          },
+          {
+            "desc": "YouTube",
+            "val": 26.95,
+            "paid": true
+          },
+          {
+            "desc": "Spotify ",
+            "val": 13.7,
+            "paid": true
+          },
+          {
+            "desc": "TotalPass Alline ",
+            "val": 99,
+            "paid": true
+          },
+          {
+            "desc": "Consignado",
+            "val": 776.92,
+            "paid": true
+          }
+        ],
+        "cards": [
+          {
+            "desc": "Smiles ",
+            "val": 974.44,
+            "paid": true
+          },
+          {
+            "desc": "Mercado Pago ",
+            "val": 1094.14,
+            "paid": true
+          },
+          {
+            "desc": "XP",
+            "val": 600,
+            "paid": true
+          },
+          {
+            "desc": "Inter",
+            "val": 3103.85,
+            "paid": true
+          },
+          {
+            "desc": "Amazon",
+            "val": 150.97,
+            "paid": true
+          }
+        ]
+      },
+      "notes": "",
+      "txByDay": {
+        "11": [
+          {
+            "id": "mm2ogxdb_00j5wc",
+            "val": 100,
+            "type": "saida",
+            "cat": "🤱 Mãe",
+            "method": "Pix",
+            "card": null,
+            "desc": "",
+            "isPig": false,
+            "ts": 1772062854383
+          },
+          {
+            "id": "mm2oiv6g_4pnzsp",
+            "val": 100,
+            "type": "saida",
+            "cat": "🍺 Lazer",
+            "method": "Pix",
+            "card": null,
+            "desc": "João - Aluguel da casa",
+            "isPig": false,
+            "ts": 1772062944856
+          }
+        ],
+        "12": [
+          {
+            "id": "mm2ojquo_jovgug",
+            "val": 30,
+            "type": "saida",
+            "cat": "🙌🏻 Doação",
+            "method": "Pix",
+            "card": null,
+            "desc": "",
+            "isPig": false,
+            "ts": 1772062985904
+          }
+        ],
+        "13": [
+          {
+            "id": "mlpqjz05_65ys7r",
+            "val": 39.99,
+            "type": "saida",
+            "cat": "🤱 Mãe",
+            "method": "Pix",
+            "card": null,
+            "desc": "Tim da mãe ",
+            "isPig": false,
+            "ts": 1771378904473
+          },
+          {
+            "id": "mlpqkiwt_lmw3m7",
+            "val": 15,
+            "type": "saida",
+            "cat": "🍺 Lazer",
+            "method": "Pix",
+            "desc": "Amendoim na rua ",
+            "isPig": false,
+            "ts": 1771370427770
+          },
+          {
+            "id": "mm3toti7_x88gci",
+            "val": 150,
+            "type": "saida",
+            "cat": "🤱 Mãe",
+            "method": "Pix",
+            "card": null,
+            "desc": "",
+            "isPig": false,
+            "ts": 1772132086879
+          }
+        ],
+        "14": [
+          {
+            "id": "mlpqpv58_s9rfnl",
+            "val": 5.5,
+            "type": "saida",
+            "cat": "🍺 Lazer",
+            "method": "Pix",
+            "desc": "Água na rua ",
+            "isPig": false,
+            "ts": 1771370443105
+          },
+          {
+            "id": "mlpqqapq_1vpjwu",
+            "val": 48,
+            "type": "saida",
+            "cat": "🍺 Lazer",
+            "method": "Pix",
+            "desc": "Cerveja na rua ",
+            "isPig": false,
+            "ts": 1771370449545
+          },
+          {
+            "id": "mlpqqpjr_0u5vc6",
+            "val": 12,
+            "type": "saida",
+            "cat": "🍺 Lazer",
+            "method": "Pix",
+            "desc": "Cerveja na rua",
+            "isPig": false,
+            "ts": 1771370456078
+          },
+          {
+            "id": "mlpr19tq_p4pozk",
+            "val": 15,
+            "type": "saida",
+            "cat": "🍺 Lazer",
+            "method": "Pix",
+            "desc": "Amendoim ",
+            "isPig": false,
+            "ts": 1771370461601
+          },
+          {
+            "id": "mm3wo06p_iw8rk0",
+            "val": 62.8,
+            "type": "saida",
+            "cat": "🚗 Transporte",
+            "method": "Credito",
+            "card": "Inter",
+            "desc": "Uber RJ",
+            "isPig": false,
+            "ts": 1772137087729
+          },
+          {
+            "id": "mm3wonay_wexuko",
+            "val": 140.2,
+            "type": "saida",
+            "cat": "🍺 Lazer",
+            "method": "Credito",
+            "card": "Inter",
+            "desc": "Pura Chama restaurante RJ",
+            "isPig": false,
+            "ts": 1772137218393
+          },
+          {
+            "id": "mm3wqn47_zg87d4",
+            "val": 88.07,
+            "type": "saida",
+            "cat": "🍺 Lazer",
+            "method": "Credito",
+            "card": "Inter",
+            "desc": "Di Parma RJ",
+            "isPig": false,
+            "ts": 1772137210759
+          }
+        ],
+        "15": [
+          {
+            "id": "mlpr2yg6_80gqpw",
+            "val": 280,
+            "type": "saida",
+            "cat": "Casa",
+            "method": "Pix",
+            "desc": "Marmitas da Jaque",
+            "isPig": false,
+            "ts": 1771281181158
+          },
+          {
+            "id": "mlpr3moa_82oggi",
+            "val": 100,
+            "type": "saida",
+            "cat": "👰 Alline",
+            "method": "Pix",
+            "card": null,
+            "desc": "Pix para Alline ",
+            "isPig": false,
+            "ts": 1771378539364
+          },
+          {
+            "id": "mlpr4aq7_gy0yzj",
+            "val": 254.85,
+            "type": "saida",
+            "cat": "🍺 Lazer",
+            "method": "Pix",
+            "desc": "Bar do Beneh",
+            "isPig": false,
+            "ts": 1771370479292
+          },
+          {
+            "id": "mlpr4xeo_xxb0of",
+            "val": 80.46,
+            "type": "saida",
+            "cat": "🍺 Lazer",
+            "method": "Pix",
+            "desc": "Di Parma ",
+            "isPig": false,
+            "ts": 1771370485367
+          },
+          {
+            "id": "mm3wsxxg_m1gswx",
+            "val": 211,
+            "type": "saida",
+            "cat": "🛒 Mercado",
+            "method": "Credito",
+            "card": "Inter",
+            "desc": "On Tap RJ",
+            "isPig": false,
+            "ts": 1772137318084
+          },
+          {
+            "id": "mm3wuucr_r7g6m2",
+            "val": 18.98,
+            "type": "saida",
+            "cat": "🚗 Transporte",
+            "method": "Credito",
+            "card": "Inter",
+            "desc": "Uber RJ",
+            "isPig": false,
+            "ts": 1772137406763
+          },
+          {
+            "id": "mm3wvobx_g4bjwo",
+            "val": 28,
+            "type": "saida",
+            "cat": "🍺 Lazer",
+            "method": "Credito",
+            "card": "Inter",
+            "desc": "MP Emilly",
+            "isPig": false,
+            "ts": 1772137445613
+          },
+          {
+            "id": "mm3wvyja_nihgiq",
+            "val": 14,
+            "type": "saida",
+            "cat": "🍺 Lazer",
+            "method": "Credito",
+            "card": "Inter",
+            "desc": "MP Emilly",
+            "isPig": false,
+            "ts": 1772137458838
+          },
+          {
+            "id": "mm3ww9i0_rjzjwl",
+            "val": 24,
+            "type": "saida",
+            "cat": "🍺 Lazer",
+            "method": "Credito",
+            "card": "Inter",
+            "desc": "MP Emilly",
+            "isPig": false,
+            "ts": 1772137473048
+          }
+        ],
+        "16": [
+          {
+            "id": "mlpr6crl_dk16tb",
+            "val": 20,
+            "type": "saida",
+            "cat": "🙌🏻 Doação",
+            "method": "Pix",
+            "card": null,
+            "desc": "União Solidária ",
+            "isPig": false,
+            "ts": 1771378692691
+          },
+          {
+            "id": "mlpr6npl_jnejnr",
+            "val": 150,
+            "type": "saida",
+            "cat": "👰 Alline",
+            "method": "Pix",
+            "card": null,
+            "desc": "Pix para Alline ",
+            "isPig": false,
+            "ts": 1771378556253
+          },
+          {
+            "id": "mm3wxcl5_soi2st",
+            "val": 25,
+            "type": "saida",
+            "cat": "🍺 Lazer",
+            "method": "Credito",
+            "card": "Inter",
+            "desc": "MP Kikin",
+            "isPig": false,
+            "ts": 1772137523705
+          },
+          {
+            "id": "mm3wxxss_9wkn9b",
+            "val": 6,
+            "type": "saida",
+            "cat": "🍺 Lazer",
+            "method": "Credito",
+            "card": "Inter",
+            "desc": "MP Bebidas",
+            "isPig": false,
+            "ts": 1772137551196
+          },
+          {
+            "id": "mm3wyff4_cl3zg5",
+            "val": 16,
+            "type": "saida",
+            "cat": "🍺 Lazer",
+            "method": "Credito",
+            "card": "Inter",
+            "desc": "MP Leticia",
+            "isPig": false,
+            "ts": 1772137574032
+          }
+        ],
+        "17": [
+          {
+            "id": "mlr85tfh_ry2bd6",
+            "val": 139.04,
+            "type": "saida",
+            "cat": "🍺 Lazer",
+            "method": "Credito",
+            "card": "XP",
+            "desc": "Di Parma ",
+            "isPig": false,
+            "ts": 1771378238066
+          },
+          {
+            "id": "mlralvmx_8b6gku",
+            "val": 10,
+            "type": "saida",
+            "cat": "🙌🏻 Doação",
+            "method": "Pix",
+            "card": null,
+            "desc": "Doação ",
+            "isPig": false,
+            "ts": 1771378656999
+          },
+          {
+            "id": "mm3tu0z1_61ymzb",
+            "val": 36,
+            "type": "saida",
+            "cat": "🤱 Mãe",
+            "method": "Pix",
+            "card": null,
+            "desc": "",
+            "isPig": false,
+            "ts": 1772132329837
+          },
+          {
+            "id": "mm3tvdmy_pnin0x",
+            "val": 350.27,
+            "type": "saida",
+            "cat": "🍺 Lazer",
+            "method": "Pix",
+            "card": null,
+            "desc": "Bar do Adão",
+            "isPig": false,
+            "ts": 1772132392906
+          },
+          {
+            "id": "mm3twd3l_uyshuv",
+            "val": 54.6,
+            "type": "saida",
+            "cat": "🚗 Transporte",
+            "method": "Pix",
+            "card": null,
+            "desc": "Uber volta do Adão",
+            "isPig": false,
+            "ts": 1772132438865
+          }
+        ],
+        "18": [
+          {
+            "id": "mlsi5znj_78odj5",
+            "val": 100,
+            "type": "saida",
+            "cat": "👰 Alline",
+            "method": "Pix",
+            "card": null,
+            "desc": "",
+            "isPig": false,
+            "ts": 1771447604672
+          },
+          {
+            "id": "mm3tyghm_5f7gjg",
+            "val": 245,
+            "type": "saida",
+            "cat": "🛒 Mercado",
+            "method": "Pix",
+            "card": null,
+            "desc": "Mercado e padaria para Morango",
+            "isPig": false,
+            "ts": 1772132536570
+          },
+          {
+            "id": "mm3tyuog_fckg42",
+            "val": 40,
+            "type": "saida",
+            "cat": "🤱 Mãe",
+            "method": "Pix",
+            "card": null,
+            "desc": "",
+            "isPig": false,
+            "ts": 1772132554960
+          },
+          {
+            "id": "mm3u0a4q_n4ldp6",
+            "val": 139.62,
+            "type": "saida",
+            "cat": "🍺 Lazer",
+            "method": "Pix",
+            "card": null,
+            "desc": "Zé delivery RJ",
+            "isPig": false,
+            "ts": 1772132621642
+          }
+        ],
+        "19": [
+          {
+            "id": "mm3u1hdd_z4hn38",
+            "val": 305.04,
+            "type": "saida",
+            "cat": "🚗 Transporte",
+            "method": "Pix",
+            "card": null,
+            "desc": "Passagem RJ volta carnaval",
+            "isPig": false,
+            "ts": 1772132677681
+          },
+          {
+            "id": "mm3wztgl_kub38u",
+            "val": 7.84,
+            "type": "saida",
+            "cat": "🚗 Transporte",
+            "method": "Credito",
+            "card": "Inter",
+            "desc": "Uber Campos",
+            "isPig": false,
+            "ts": 1772137638885
+          }
+        ],
+        "21": [
+          {
+            "id": "mm3u5jdd_j7qka1",
+            "val": 67.96,
+            "type": "saida",
+            "cat": "💊 Saude",
+            "method": "Pix",
+            "card": null,
+            "desc": "Ifood Farmácia",
+            "isPig": false,
+            "ts": 1772132866897
+          },
+          {
+            "id": "mm3x0ifi_mp8lcu",
+            "val": 31.32,
+            "type": "saida",
+            "cat": "🍺 Lazer",
+            "method": "Credito",
+            "card": "Inter",
+            "desc": "Zé Mãe",
+            "isPig": false,
+            "ts": 1772137671246
+          }
+        ],
+        "22": [
+          {
+            "id": "mm3u7fuu_i39hnb",
+            "val": 37.46,
+            "type": "saida",
+            "cat": "🍔 Alimentacao",
+            "method": "Pix",
+            "card": null,
+            "desc": "Ifood Açaí",
+            "isPig": false,
+            "ts": 1772132955654
+          }
+        ],
+        "23": [
+          {
+            "id": "mm3u86xs_c5ozce",
+            "val": 50,
+            "type": "saida",
+            "cat": "👰 Alline",
+            "method": "Pix",
+            "card": null,
+            "desc": "",
+            "isPig": false,
+            "ts": 1772132990752
+          },
+          {
+            "id": "mm3u93u7_vdohcc",
+            "val": 160,
+            "type": "saida",
+            "cat": "🛒 Mercado",
+            "method": "Pix",
+            "card": null,
+            "desc": "4 pacotes de café a Reggis ",
+            "isPig": false,
+            "ts": 1772133059873
+          },
+          {
+            "id": "mm3ubm1e_bycr3o",
+            "val": 9.07,
+            "type": "saida",
+            "cat": "🚗 Transporte",
+            "method": "Pix",
+            "card": null,
+            "desc": "Entrega do café",
+            "isPig": false,
+            "ts": 1772133150290
+          },
+          {
+            "id": "mm5l4nry_cx39lr",
+            "val": 32.24,
+            "type": "saida",
+            "cat": "🛒 Mercado",
+            "method": "Credito",
+            "card": "XP",
+            "desc": "Casas Macedo Campos",
+            "isPig": false,
+            "ts": 1772238641758
+          }
+        ],
+        "24": [
+          {
+            "id": "mm5l0j0n_g5k966",
+            "val": 27.17,
+            "type": "saida",
+            "cat": "💊 Saude",
+            "method": "Credito",
+            "card": "Inter",
+            "desc": "Remédio dente",
+            "isPig": false,
+            "ts": 1772238448967
+          },
+          {
+            "id": "mm5l0zul_qnqt1y",
+            "val": 11.95,
+            "type": "saida",
+            "cat": "🚗 Transporte",
+            "method": "Credito",
+            "card": "Inter",
+            "desc": "Ida Dentista",
+            "isPig": false,
+            "ts": 1772238470781
+          },
+          {
+            "id": "mm5l1crb_7q3j36",
+            "val": 11.94,
+            "type": "saida",
+            "cat": "🚗 Transporte",
+            "method": "Pix",
+            "card": null,
+            "desc": "Volta Dentista",
+            "isPig": false,
+            "ts": 1772238487511
+          }
+        ],
+        "26": [
+          {
+            "id": "mm5k16kw_m2u0au",
+            "val": 50,
+            "type": "saida",
+            "cat": "👰 Alline",
+            "method": "Pix",
+            "card": null,
+            "desc": "",
+            "isPig": false,
+            "ts": 1772236799888
+          }
+        ],
+        "27": [
+          {
+            "id": "mm5f3bux_feghwi",
+            "val": 600,
+            "type": "saida",
+            "cat": "💊 Saude",
+            "method": "Pix",
+            "card": null,
+            "desc": "Dentista",
+            "isPig": false,
+            "ts": 1772228501961
+          },
+          {
+            "id": "mm5jzahr_s12ahh",
+            "val": 50,
+            "type": "saida",
+            "cat": "👰 Alline",
+            "method": "Pix",
+            "card": null,
+            "desc": "",
+            "isPig": false,
+            "ts": 1772236711647
+          },
+          {
+            "id": "mm5l2cpp_6b2d8r",
+            "val": 10.96,
+            "type": "saida",
+            "cat": "🚗 Transporte",
+            "method": "Credito",
+            "card": "Inter",
+            "desc": "Ida ao Dentista",
+            "isPig": false,
+            "ts": 1772238534109
+          },
+          {
+            "id": "mm5l2qtj_me0s3s",
+            "val": 11.95,
+            "type": "saida",
+            "cat": "🚗 Transporte",
+            "method": "Credito",
+            "card": "Inter",
+            "desc": "Volta do Dentista",
+            "isPig": false,
+            "ts": 1772238552391
+          },
+          {
+            "id": "mm5l5dpq_ek9bjo",
+            "val": 29.98,
+            "type": "saida",
+            "cat": "💊 Saude",
+            "method": "Credito",
+            "card": "XP",
+            "desc": "Remédio dente",
+            "isPig": false,
+            "ts": 1772238675374
+          },
+          {
+            "id": "mm5l5sz0_xyhvqo",
+            "val": 35.47,
+            "type": "saida",
+            "cat": "🍔 Alimentacao",
+            "method": "Pix",
+            "card": null,
+            "desc": "Ifood Açaí",
+            "isPig": false,
+            "ts": 1772238695148
+          }
+        ],
+        "28": [
+          {
+            "id": "mm72jxvh_kipvst",
+            "val": 55.55,
+            "type": "saida",
+            "cat": "💊 Saude",
+            "method": "Credito",
+            "card": "Itaú Signature",
+            "desc": "Pomada de Acne",
+            "isPig": false,
+            "ts": 1772328374333
+          },
+          {
+            "id": "mm72kyso_26lvtk",
+            "val": 35.39,
+            "type": "saida",
+            "cat": "🍺 Lazer",
+            "method": "Credito",
+            "card": "Itaú Signature",
+            "desc": "Zé Mãe",
+            "isPig": false,
+            "ts": 1772328430147
+          },
+          {
+            "id": "mm72lzmp_ccbg3n",
+            "val": 114.94,
+            "type": "saida",
+            "cat": "🏠 Casa",
+            "method": "Credito",
+            "card": "Itaú Signature",
+            "desc": "Itens para casa Mercado Livre",
+            "isPig": false,
+            "ts": 1772328469921
+          },
+          {
+            "id": "mm72nvny_6i39qo",
+            "val": 35.47,
+            "type": "saida",
+            "cat": "🍔 Alimentacao",
+            "method": "Credito",
+            "card": "Itaú Signature",
+            "desc": "Ifood Açaí",
+            "isPig": false,
+            "ts": 1772328558094
+          }
+        ]
+      },
+      "manualDaily": {},
+      "pigsByBank": {}
+    },
+    "2026-03": {
+      "cfg": {
+        "startBalance": 1395.92,
+        "weekendFactor": 1
+      },
+      "incomes": {
+        "adiant": 0,
+        "sal": 0,
+        "extras": [
+          {
+            "desc": "Férias",
+            "val": 4602.99
+          }
+        ]
+      },
+      "expenses": {
+        "fixed": [
+          {
+            "desc": "Consignado",
+            "val": 582.63,
+            "paid": false
+          },
+          {
+            "desc": "Energia",
+            "val": 202.91,
+            "paid": false
+          },
+          {
+            "desc": "Claro",
+            "val": 289.61,
+            "paid": false
+          },
+          {
+            "desc": "Casa Praia",
+            "val": 300,
+            "paid": false
+          },
+          {
+            "desc": "Luz Mãe ",
+            "val": 200,
+            "paid": false
+          },
+          {
+            "desc": "Compras Mãe ",
+            "val": 200,
+            "paid": true,
+            "pg": true,
+            "pago": true
+          },
+          {
+            "desc": "João (Aluguel)",
+            "val": 92,
+            "paid": true
+          },
+          {
+            "desc": "Água Mãe ",
+            "val": 70,
+            "paid": false
+          },
+          {
+            "desc": "Ajuda ONGs",
+            "val": 50,
+            "paid": false
+          },
+          {
+            "desc": "Consignado",
+            "val": 776.92,
+            "paid": false
+          }
+        ],
+        "cards": [
+          {
+            "desc": "Smiles ",
+            "val": 0,
+            "paid": false
+          },
+          {
+            "desc": "Mercado Pago ",
+            "val": 0,
+            "paid": false
+          },
+          {
+            "desc": "XP",
+            "val": 0,
+            "paid": false
+          },
+          {
+            "desc": "Inter",
+            "val": 0,
+            "paid": false
+          },
+          {
+            "desc": "Amazon",
+            "val": 0,
+            "paid": false
+          },
+          {
+            "desc": "Itaú Signature",
+            "val": 0,
+            "paid": false
+          }
+        ]
+      },
+      "notes": "",
+      "txByDay": {
+        "1": [
+          {
+            "id": "mm86chod_evjz6q",
+            "val": 128,
+            "type": "saida",
+            "cat": "👰 Alline",
+            "method": "Credito",
+            "card": "Itaú Signature",
+            "desc": "Maiô",
+            "isPig": true,
+            "ts": 1772400250343
+          },
+          {
+            "id": "mm86rw3a_x8mr2o",
+            "val": 265,
+            "type": "saida",
+            "cat": "👰 Alline",
+            "method": "Credito",
+            "card": "Itaú Signature",
+            "desc": "Faculdade",
+            "isPig": true,
+            "ts": 1772400253286
+          },
+          {
+            "id": "mm8b9vj3_wzy25s",
+            "val": 50,
+            "type": "saida",
+            "cat": "🐷 Cofrinhos",
+            "method": "Dinheiro",
+            "card": null,
+            "desc": "Desafio Itaú",
+            "isPig": false,
+            "ts": 1772403557778
+          }
+        ]
+      },
+      "manualDaily": {},
+      "pigsByBank": {
+        "Cofrinho Itaú": 393,
+        "Desafio Itaú": 50
+      }
+    },
+    "2026-04": {
+      "cfg": {
+        "startBalance": 0,
+        "weekendFactor": 3
+      },
+      "incomes": {
+        "adiant": 1677.39,
+        "sal": 2058.67,
+        "extras": []
+      },
+      "expenses": {
+        "fixed": [
+          {
+            "desc": "Consignado",
+            "val": 582.63,
+            "paid": false
+          },
+          {
+            "desc": "Energia",
+            "val": 202.91,
+            "paid": false
+          },
+          {
+            "desc": "Claro",
+            "val": 289.61,
+            "paid": false
+          },
+          {
+            "desc": "Casa Praia",
+            "val": 300,
+            "paid": false
+          },
+          {
+            "desc": "Luz Mãe ",
+            "val": 200,
+            "paid": false
+          },
+          {
+            "desc": "Compras Mãe ",
+            "val": 200,
+            "paid": false
+          },
+          {
+            "desc": "Água Mãe ",
+            "val": 70,
+            "paid": false
+          },
+          {
+            "desc": "Ajuda ONGs",
+            "val": 50,
+            "paid": false
+          },
+          {
+            "desc": "Consignado",
+            "val": 776.92,
+            "paid": false
+          }
+        ],
+        "cards": [
+          {
+            "desc": "Smiles ",
+            "val": 0,
+            "paid": false
+          },
+          {
+            "desc": "Mercado Pago ",
+            "val": 0,
+            "paid": false
+          },
+          {
+            "desc": "XP",
+            "val": 0,
+            "paid": false
+          },
+          {
+            "desc": "Inter",
+            "val": 0,
+            "paid": false
+          },
+          {
+            "desc": "Amazon",
+            "val": 0,
+            "paid": false
+          }
+        ]
+      },
+      "notes": "",
+      "txByDay": {},
+      "manualDaily": [],
+      "pigsByBank": {
+        "Cofrinho Itaú": 0
+      }
+    },
+    "2026-05": {
+      "cfg": {
+        "startBalance": 0,
+        "weekendFactor": 3
+      },
+      "incomes": {
+        "adiant": 1677.39,
+        "sal": 2058.67,
+        "extras": []
+      },
+      "expenses": {
+        "fixed": [
+          {
+            "desc": "Consignado",
+            "val": 582.63,
+            "paid": false
+          },
+          {
+            "desc": "Energia",
+            "val": 202.91,
+            "paid": false
+          },
+          {
+            "desc": "Claro",
+            "val": 289.61,
+            "paid": false
+          },
+          {
+            "desc": "Casa Praia",
+            "val": 300,
+            "paid": false
+          },
+          {
+            "desc": "Luz Mãe ",
+            "val": 200,
+            "paid": false
+          },
+          {
+            "desc": "Compras Mãe ",
+            "val": 200,
+            "paid": false
+          },
+          {
+            "desc": "Água Mãe ",
+            "val": 70,
+            "paid": false
+          },
+          {
+            "desc": "Ajuda ONGs",
+            "val": 50,
+            "paid": false
+          },
+          {
+            "desc": "Consignado",
+            "val": 776.92,
+            "paid": false
+          }
+        ],
+        "cards": [
+          {
+            "desc": "Smiles ",
+            "val": 0,
+            "paid": false
+          },
+          {
+            "desc": "Mercado Pago ",
+            "val": 0,
+            "paid": false
+          },
+          {
+            "desc": "XP",
+            "val": 0,
+            "paid": false
+          },
+          {
+            "desc": "Inter",
+            "val": 0,
+            "paid": false
+          },
+          {
+            "desc": "Amazon",
+            "val": 0,
+            "paid": false
+          }
+        ]
+      },
+      "notes": "",
+      "txByDay": {},
+      "manualDaily": [],
+      "pigsByBank": {
+        "Cofrinho Itaú": 0
+      }
+    },
+    "2026-06": {
+      "cfg": {
+        "startBalance": 0,
+        "weekendFactor": 3
+      },
+      "incomes": {
+        "adiant": 1677.39,
+        "sal": 2058.67,
+        "extras": []
+      },
+      "expenses": {
+        "fixed": [
+          {
+            "desc": "Consignado",
+            "val": 582.63,
+            "paid": false
+          },
+          {
+            "desc": "Energia",
+            "val": 202.91,
+            "paid": false
+          },
+          {
+            "desc": "Claro",
+            "val": 289.61,
+            "paid": false
+          },
+          {
+            "desc": "Casa Praia",
+            "val": 300,
+            "paid": false
+          },
+          {
+            "desc": "Luz Mãe ",
+            "val": 200,
+            "paid": false
+          },
+          {
+            "desc": "Compras Mãe ",
+            "val": 200,
+            "paid": false
+          },
+          {
+            "desc": "Água Mãe ",
+            "val": 70,
+            "paid": false
+          },
+          {
+            "desc": "Ajuda ONGs",
+            "val": 50,
+            "paid": false
+          },
+          {
+            "desc": "Consignado",
+            "val": 776.92,
+            "paid": false
+          }
+        ],
+        "cards": [
+          {
+            "desc": "Smiles ",
+            "val": 0,
+            "paid": false
+          },
+          {
+            "desc": "Mercado Pago ",
+            "val": 0,
+            "paid": false
+          },
+          {
+            "desc": "XP",
+            "val": 0,
+            "paid": false
+          },
+          {
+            "desc": "Inter",
+            "val": 0,
+            "paid": false
+          },
+          {
+            "desc": "Amazon",
+            "val": 0,
+            "paid": false
+          }
+        ]
+      },
+      "notes": "",
+      "txByDay": {},
+      "manualDaily": [],
+      "pigsByBank": {
+        "Cofrinho Itaú": 0
+      }
+    },
+    "2026-07": {
+      "cfg": {
+        "startBalance": 0,
+        "weekendFactor": 3
+      },
+      "incomes": {
+        "adiant": 1677.39,
+        "sal": 2058.67,
+        "extras": []
+      },
+      "expenses": {
+        "fixed": [
+          {
+            "desc": "Consignado",
+            "val": 582.63,
+            "paid": false
+          },
+          {
+            "desc": "Energia",
+            "val": 202.91,
+            "paid": false
+          },
+          {
+            "desc": "Claro",
+            "val": 289.61,
+            "paid": false
+          },
+          {
+            "desc": "Casa Praia",
+            "val": 300,
+            "paid": false
+          },
+          {
+            "desc": "Luz Mãe ",
+            "val": 200,
+            "paid": false
+          },
+          {
+            "desc": "Compras Mãe ",
+            "val": 200,
+            "paid": false
+          },
+          {
+            "desc": "Água Mãe ",
+            "val": 70,
+            "paid": false
+          },
+          {
+            "desc": "Ajuda ONGs",
+            "val": 50,
+            "paid": false
+          },
+          {
+            "desc": "Consignado",
+            "val": 776.92,
+            "paid": false
+          }
+        ],
+        "cards": [
+          {
+            "desc": "Smiles ",
+            "val": 0,
+            "paid": false
+          },
+          {
+            "desc": "Mercado Pago ",
+            "val": 0,
+            "paid": false
+          },
+          {
+            "desc": "XP",
+            "val": 0,
+            "paid": false
+          },
+          {
+            "desc": "Inter",
+            "val": 0,
+            "paid": false
+          },
+          {
+            "desc": "Amazon",
+            "val": 0,
+            "paid": false
+          }
+        ]
+      },
+      "notes": "",
+      "txByDay": {},
+      "manualDaily": [],
+      "pigsByBank": {
+        "Cofrinho Itaú": 0
+      }
+    },
+    "2026-08": {
+      "cfg": {
+        "startBalance": 0,
+        "weekendFactor": 3
+      },
+      "incomes": {
+        "adiant": 1677.39,
+        "sal": 2058.67,
+        "extras": []
+      },
+      "expenses": {
+        "fixed": [
+          {
+            "desc": "Consignado",
+            "val": 582.63,
+            "paid": false
+          },
+          {
+            "desc": "Energia",
+            "val": 202.91,
+            "paid": false
+          },
+          {
+            "desc": "Claro",
+            "val": 289.61,
+            "paid": false
+          },
+          {
+            "desc": "Casa Praia",
+            "val": 300,
+            "paid": false
+          },
+          {
+            "desc": "Luz Mãe ",
+            "val": 200,
+            "paid": false
+          },
+          {
+            "desc": "Compras Mãe ",
+            "val": 200,
+            "paid": false
+          },
+          {
+            "desc": "Água Mãe ",
+            "val": 70,
+            "paid": false
+          },
+          {
+            "desc": "Ajuda ONGs",
+            "val": 50,
+            "paid": false
+          },
+          {
+            "desc": "Consignado",
+            "val": 776.92,
+            "paid": false
+          }
+        ],
+        "cards": [
+          {
+            "desc": "Smiles ",
+            "val": 0,
+            "paid": false
+          },
+          {
+            "desc": "Mercado Pago ",
+            "val": 0,
+            "paid": false
+          },
+          {
+            "desc": "XP",
+            "val": 0,
+            "paid": false
+          },
+          {
+            "desc": "Inter",
+            "val": 0,
+            "paid": false
+          },
+          {
+            "desc": "Amazon",
+            "val": 0,
+            "paid": false
+          }
+        ]
+      },
+      "notes": "",
+      "txByDay": {},
+      "manualDaily": [],
+      "pigsByBank": {
+        "Cofrinho Itaú": 0
+      }
+    },
+    "2026-09": {
+      "cfg": {
+        "startBalance": 0,
+        "weekendFactor": 3
+      },
+      "incomes": {
+        "adiant": 1677.39,
+        "sal": 2058.67,
+        "extras": []
+      },
+      "expenses": {
+        "fixed": [
+          {
+            "desc": "Consignado",
+            "val": 582.63,
+            "paid": false
+          },
+          {
+            "desc": "Energia",
+            "val": 202.91,
+            "paid": false
+          },
+          {
+            "desc": "Claro",
+            "val": 289.61,
+            "paid": false
+          },
+          {
+            "desc": "Casa Praia",
+            "val": 300,
+            "paid": false
+          },
+          {
+            "desc": "Luz Mãe ",
+            "val": 200,
+            "paid": false
+          },
+          {
+            "desc": "Compras Mãe ",
+            "val": 200,
+            "paid": false
+          },
+          {
+            "desc": "Água Mãe ",
+            "val": 70,
+            "paid": false
+          },
+          {
+            "desc": "Ajuda ONGs",
+            "val": 50,
+            "paid": false
+          },
+          {
+            "desc": "Consignado",
+            "val": 776.92,
+            "paid": false
+          }
+        ],
+        "cards": [
+          {
+            "desc": "Smiles ",
+            "val": 0,
+            "paid": false
+          },
+          {
+            "desc": "Mercado Pago ",
+            "val": 0,
+            "paid": false
+          },
+          {
+            "desc": "XP",
+            "val": 0,
+            "paid": false
+          },
+          {
+            "desc": "Inter",
+            "val": 0,
+            "paid": false
+          },
+          {
+            "desc": "Amazon",
+            "val": 0,
+            "paid": false
+          }
+        ]
+      },
+      "notes": "",
+      "txByDay": {},
+      "manualDaily": [],
+      "pigsByBank": {
+        "Cofrinho Itaú": 0
+      }
+    },
+    "2026-10": {
+      "cfg": {
+        "startBalance": 0,
+        "weekendFactor": 3
+      },
+      "incomes": {
+        "adiant": 1677.39,
+        "sal": 2058.67,
+        "extras": []
+      },
+      "expenses": {
+        "fixed": [
+          {
+            "desc": "Consignado",
+            "val": 582.63,
+            "paid": false
+          },
+          {
+            "desc": "Energia",
+            "val": 202.91,
+            "paid": false
+          },
+          {
+            "desc": "Claro",
+            "val": 289.61,
+            "paid": false
+          },
+          {
+            "desc": "Casa Praia",
+            "val": 300,
+            "paid": false
+          },
+          {
+            "desc": "Luz Mãe ",
+            "val": 200,
+            "paid": false
+          },
+          {
+            "desc": "Compras Mãe ",
+            "val": 200,
+            "paid": false
+          },
+          {
+            "desc": "Água Mãe ",
+            "val": 70,
+            "paid": false
+          },
+          {
+            "desc": "Ajuda ONGs",
+            "val": 50,
+            "paid": false
+          },
+          {
+            "desc": "Consignado",
+            "val": 776.92,
+            "paid": false
+          }
+        ],
+        "cards": [
+          {
+            "desc": "Smiles ",
+            "val": 0,
+            "paid": false
+          },
+          {
+            "desc": "Mercado Pago ",
+            "val": 0,
+            "paid": false
+          },
+          {
+            "desc": "XP",
+            "val": 0,
+            "paid": false
+          },
+          {
+            "desc": "Inter",
+            "val": 0,
+            "paid": false
+          },
+          {
+            "desc": "Amazon",
+            "val": 0,
+            "paid": false
+          }
+        ]
+      },
+      "notes": "",
+      "txByDay": {},
+      "manualDaily": [],
+      "pigsByBank": {
+        "Cofrinho Itaú": 0
+      }
+    },
+    "2026-11": {
+      "cfg": {
+        "startBalance": 0,
+        "weekendFactor": 3
+      },
+      "incomes": {
+        "adiant": 1677.39,
+        "sal": 2058.67,
+        "extras": []
+      },
+      "expenses": {
+        "fixed": [
+          {
+            "desc": "Consignado",
+            "val": 582.63,
+            "paid": false
+          },
+          {
+            "desc": "Energia",
+            "val": 202.91,
+            "paid": false
+          },
+          {
+            "desc": "Claro",
+            "val": 289.61,
+            "paid": false
+          },
+          {
+            "desc": "Casa Praia",
+            "val": 300,
+            "paid": false
+          },
+          {
+            "desc": "Luz Mãe ",
+            "val": 200,
+            "paid": false
+          },
+          {
+            "desc": "Compras Mãe ",
+            "val": 200,
+            "paid": false
+          },
+          {
+            "desc": "Água Mãe ",
+            "val": 70,
+            "paid": false
+          },
+          {
+            "desc": "Ajuda ONGs",
+            "val": 50,
+            "paid": false
+          },
+          {
+            "desc": "Consignado",
+            "val": 776.92,
+            "paid": false
+          }
+        ],
+        "cards": [
+          {
+            "desc": "Smiles ",
+            "val": 0,
+            "paid": false
+          },
+          {
+            "desc": "Mercado Pago ",
+            "val": 0,
+            "paid": false
+          },
+          {
+            "desc": "XP",
+            "val": 0,
+            "paid": false
+          },
+          {
+            "desc": "Inter",
+            "val": 0,
+            "paid": false
+          },
+          {
+            "desc": "Amazon",
+            "val": 0,
+            "paid": false
+          }
+        ]
+      },
+      "notes": "",
+      "txByDay": {},
+      "manualDaily": [],
+      "pigsByBank": {
+        "Cofrinho Itaú": 0
+      }
+    },
+    "2026-12": {
+      "cfg": {
+        "startBalance": 0,
+        "weekendFactor": 3
+      },
+      "incomes": {
+        "adiant": 1677.39,
+        "sal": 2058.67,
+        "extras": []
+      },
+      "expenses": {
+        "fixed": [
+          {
+            "desc": "Consignado",
+            "val": 582.63,
+            "paid": false
+          },
+          {
+            "desc": "Energia",
+            "val": 202.91,
+            "paid": false
+          },
+          {
+            "desc": "Claro",
+            "val": 289.61,
+            "paid": false
+          },
+          {
+            "desc": "Casa Praia",
+            "val": 300,
+            "paid": false
+          },
+          {
+            "desc": "Luz Mãe ",
+            "val": 200,
+            "paid": false
+          },
+          {
+            "desc": "Compras Mãe ",
+            "val": 200,
+            "paid": false
+          },
+          {
+            "desc": "Água Mãe ",
+            "val": 70,
+            "paid": false
+          },
+          {
+            "desc": "Ajuda ONGs",
+            "val": 50,
+            "paid": false
+          },
+          {
+            "desc": "Consignado",
+            "val": 776.92,
+            "paid": false
+          }
+        ],
+        "cards": [
+          {
+            "desc": "Smiles ",
+            "val": 0,
+            "paid": false
+          },
+          {
+            "desc": "Mercado Pago ",
+            "val": 0,
+            "paid": false
+          },
+          {
+            "desc": "XP",
+            "val": 0,
+            "paid": false
+          },
+          {
+            "desc": "Inter",
+            "val": 0,
+            "paid": false
+          },
+          {
+            "desc": "Amazon",
+            "val": 0,
+            "paid": false
+          }
+        ]
+      },
+      "notes": "",
+      "txByDay": {},
+      "manualDaily": [],
+      "pigsByBank": {
+        "Cofrinho Itaú": 0
+      }
+    }
+  },
+  "pigs": [
+    {
+      "name": "Inter",
+      "initial": 0
+    },
+    {
+      "name": "XP",
+      "initial": 0
+    },
+    {
+      "name": "Mercado Pago",
+      "initial": 0
+    },
+    {
+      "name": "Itaú",
+      "initial": 0
+    }
+  ]
+}
