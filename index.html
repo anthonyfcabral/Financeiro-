@@ -1119,10 +1119,23 @@ function renderDaily(){
     const ctx=document.getElementById('chartDaily').getContext('2d'); safeDestroy(charts.daily);
     charts.daily=new Chart(ctx,{type:'bar',data:{ labels, datasets },options:{responsive:true, maintainAspectRatio:false,scales:{x:{ stacked:true, grid:{display:false}, ticks:{autoSkip:false,maxRotation:90,font:{size:10}} },y:{ stacked:true, grid:{color:'#333'} }},plugins:{ legend:{display:false}, tooltip:{mode:'index', intersect:false} }}});
     
-    const s=buildMonthlySummary(m);
-    const cats=Object.keys(s.cats).sort((a,b)=>s.cats[b]-s.cats[a]); const vals=cats.map(c=>s.cats[c]);
+    const pieData = Array.from(activeCats).map(cat => {
+        return {
+            cat: cat,
+            val: labels.reduce((sum, d) => sum + (rawData[d][cat] || 0), 0),
+            color: cat === 'Manual' ? '#95a5a6' : getCatColor(cat)
+        };
+    }).filter(x => x.val > 0).sort((a,b) => b.val - a.val);
+
     const pieCtx=document.getElementById('chartDailyPie').getContext('2d'); safeDestroy(charts.dailyPie);
-    charts.dailyPie=new Chart(pieCtx,{type:'doughnut',data:{labels:cats,datasets:[{data:vals,backgroundColor:cats.map(c=>getCatColor(c)),borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,layout:{padding:10},plugins:{legend:{display:false}}}});
+    charts.dailyPie=new Chart(pieCtx,{
+        type:'doughnut',
+        data:{
+            labels: pieData.map(x => x.cat),
+            datasets:[{ data: pieData.map(x => x.val), backgroundColor: pieData.map(x => x.color), borderWidth:0 }]
+        },
+        options:{responsive:true,maintainAspectRatio:false,layout:{padding:10},plugins:{legend:{display:false}}}
+    });
   }
 }
 
