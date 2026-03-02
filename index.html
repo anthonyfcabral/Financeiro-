@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>FinApp (v10.12 Multi-Cartões)</title>
+  <title>FinApp (v10.17 Calculadora de Fatura)</title>
   <meta name="theme-color" content="#121212" />
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
@@ -100,6 +100,8 @@ body{font-family:Segoe UI,sans-serif;background:var(--bg);color:var(--text);marg
     .tx-actions .edit{color:#f1c40f}
     .tx-actions .del{color:var(--secondary)}
     .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+      .field{display:flex;flex-direction:column;gap:6px}
+      .field-label{font-size:12px;color:#bdbdbd;opacity:.95;margin-left:4px}
     .full{grid-column:1/-1}
     .ok{background:var(--accent);color:#000;border:none}
     
@@ -141,6 +143,28 @@ body{font-family:Segoe UI,sans-serif;background:var(--bg);color:var(--text);marg
       .tx-item{flex-direction:column;align-items:flex-start}
       .tx-actions{width:100%;display:flex;justify-content:flex-end;gap:12px}
     }
+  
+      /* Mobile navigation + sticky header (layout PC e celular) */
+      header{position:sticky;top:0;background:var(--bg);z-index:1000;padding-top:8px;padding-bottom:8px;border-bottom:1px solid rgba(255,255,255,.04)}
+      .tabs{position:sticky;top:64px;background:var(--bg);z-index:999;padding:8px 0}
+      .tabs::after{content:'';display:block;height:1px;background:rgba(255,255,255,.04);margin-top:8px}
+
+      @media (max-width: 520px){
+        header{top:0;margin-bottom:6px}
+        header h1{font-size:1.0rem}
+        /* Tabs vira barra inferior */
+        .tabs{position:fixed;top:auto;bottom:0;left:0;right:0;background:var(--card);border-top:1px solid var(--border);padding:10px 10px;gap:10px;z-index:1200}
+        .tab{border-radius:14px;padding:10px 10px;font-size:.9rem}
+        /* Evita que a barra inferior esconda conteúdo */
+        body{padding-bottom:110px}
+        /* Botões maiores e mais “clicáveis” */
+        .btn{min-height:42px}
+        input,select,textarea{min-height:42px}
+        /* Modais mais confortáveis no celular */
+        .modal-card{width:100vw;max-height:100vh;height:100vh;border-radius:0;padding:12px}
+        .modal-header{position:sticky;top:0;background:#18181b;z-index:10;padding-top:6px}
+      }
+
   </style>
 </head>
 <body>
@@ -159,7 +183,7 @@ body{font-family:Segoe UI,sans-serif;background:var(--bg);color:var(--text);marg
     </div>
 
     <header>
-      <h1>📱 FinApp (v10.12) <span class="pill">Cards</span></h1>
+      <h1>📱 FinApp (v10.17) <span class="pill">Estratégia 🐷 Real</span></h1>
       <div class="row">
         <select id="selYear"></select>
         <select id="selMonth"></select>
@@ -195,9 +219,14 @@ body{font-family:Segoe UI,sans-serif;background:var(--bg);color:var(--text);marg
           <p id="dailySaldo">R$ 0,00</p>
           <div class="muted">Calculado no mês selecionado</div>
         </div>
+        <div class="card" style="border-color: rgba(56,189,248,0.4); background: rgba(56,189,248,0.05);">
+          <h3 style="color: var(--accent);">🐷 Reservado (Faturas)</h3>
+          <p id="dailyPiggy" style="color: var(--accent);">R$ 0,00</p>
+          <div class="muted">Valor que deve estar no CDB</div>
+        </div>
         <div class="card">
           <h3>Saldo Inicial do Diário</h3>
-          <input id="inpStartBalance" type="number" style="width:100%; box-sizing:border-box; margin-top:8px" />
+          <input id="inpStartBalance" type="text" inputmode="decimal" placeholder="0,00" style="width:100%; box-sizing:border-box; margin-top:8px" />
           <div class="muted" style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap">
             <button class="btn warn" id="btnUseMonthlySobra">Usar (Receitas - Fixos)</button>
             <select id="selWeekendFactor">
@@ -234,7 +263,7 @@ body{font-family:Segoe UI,sans-serif;background:var(--bg);color:var(--text);marg
       <div class="section" style="margin-top:12px">
         <div class="section-bar">
           <div class="section-title"><span class="toggle-icon">▼</span> 📅 Lançamentos do mês</div>
-</div>
+        </div>
         <div class="content">
           <div class="table-wrap">
             <table>
@@ -266,15 +295,38 @@ body{font-family:Segoe UI,sans-serif;background:var(--bg);color:var(--text);marg
           <div class="section-bar"><div class="section-title"><span class="toggle-icon">▼</span> 💰 Receitas</div></div>
           <div class="content">
             <div class="form-grid">
-              <input id="inpAdiant" type="number" placeholder="Adiant." />
-              <input id="inpSal" type="number" placeholder="Salário" />
-              <button class="btn full" id="btnAddExtra">+ Extra</button>
+              <div class="field">
+                <div class="field-label">Adiantamento</div>
+                <input id="inpAdiant" type="text" inputmode="decimal" placeholder="0,00" />
+              </div>
+              <div class="field">
+                <div class="field-label">Salário</div>
+                <input id="inpSal" type="text" inputmode="decimal" placeholder="0,00" />
+              </div>
             </div>
+
+            <div id="boxTotalFixo" style="
+              margin-top:10px;
+              padding:10px 14px;
+              border-radius:10px;
+              background:linear-gradient(180deg, rgba(255,200,120,0.08), rgba(0,0,0,0.18));
+              border:1px solid rgba(255,200,120,0.22);
+              display:flex;
+              justify-content:space-between;
+              align-items:center;
+              font-weight:700;
+            ">
+              <span>📌 Total (Adiantamento + Salário)</span>
+              <span id="lblTotalFixo">R$ 0,00</span>
+            </div>
+
             <div style="margin-top:10px; overflow:auto;">
               <table>
                 <tbody id="tblExtras"></tbody>
               </table>
             </div>
+
+            <button class="btn full" id="btnAddExtra" style="margin-top:10px;">+ Extra</button>
           </div>
         </div>
 
@@ -301,7 +353,27 @@ body{font-family:Segoe UI,sans-serif;background:var(--bg);color:var(--text);marg
         <div class="section">
           <div class="section-bar"><div class="section-title"><span class="toggle-icon">▼</span> 💳 Cartões</div></div>
           <div class="content">
-            <button class="btn" id="btnAddCard" style="width:100%">+ Cartão</button>
+
+            <div class="notice" style="margin-bottom:12px">
+              <div style="font-weight:800; margin-bottom:8px; color:var(--accent); font-size:0.85rem;">🧮 Calculadora de Fatura Automática</div>
+              <div class="muted" style="margin-bottom:10px; font-size:0.75rem;">Macete: Pegue o valor total da fatura fechada e subtraia o que você já guardou no CDB (Porquinho). O resultado são as suas parcelas/assinaturas.</div>
+              <div class="form-grid">
+                <div class="field">
+                  <div class="field-label">Total da Fatura (App do Banco)</div>
+                  <input id="calcBillTotal" type="text" inputmode="decimal" placeholder="0,00" oninput="calcCardBill()" />
+                </div>
+                <div class="field">
+                  <div class="field-label">Guardado no 🐷 (Este Mês)</div>
+                  <input id="calcPiggySaved" type="text" inputmode="decimal" placeholder="0,00" oninput="calcCardBill()" />
+                </div>
+              </div>
+              <div style="margin-top:10px; display:flex; justify-content:space-between; align-items:center; border-top:1px solid rgba(56,189,248,.2); padding-top:8px;">
+                <span style="font-size:0.85rem;">Valor a lançar nas linhas abaixo:</span>
+                <b id="calcResult" style="color:var(--secondary); font-size:1.1rem;">R$ 0,00</b>
+              </div>
+            </div>
+
+            <button class="btn" id="btnAddCard" style="width:100%">+ Lançar Parcela/Assinatura</button>
             <div class="table-wrap" style="margin-top:10px">
               <table>
                 <thead>
@@ -335,9 +407,9 @@ body{font-family:Segoe UI,sans-serif;background:var(--bg);color:var(--text);marg
 
       
       <div class="section" style="margin-top:12px">
-        <div class="section-bar"><div class="section-title"><span class="toggle-icon">▼</span> 🐷 Porquinhos / CDB (por banco)</div></div>
+        <div class="section-bar"><div class="section-title"><span class="toggle-icon">▼</span> 📈 Patrimônio (CDBs / Caixinhas)</div></div>
         <div class="content">
-          <div class="muted" style="margin-bottom:10px">Registre o saldo atual de cada banco/CDB no mês selecionado. Isso não afeta o cálculo do Diário/Mensal — é um controle separado.</div>
+          <div class="muted" style="margin-bottom:10px">Registre aqui o saldo dos seus investimentos para o futuro. <b>Não inclua aqui</b> o dinheiro que está guardado só esperando a fatura fechar!</div>
           <div id="pigsSummary" class="notice" style="margin-bottom:12px; display:none"></div>
           <div class="table-wrap">
             <table>
@@ -490,7 +562,6 @@ function applyTheme(theme){
   const t = (theme==='light' || theme==='amber' || theme==='dark') ? theme : 'dark';
   document.body.dataset.theme = t;
   lsSet(THEME_KEY, t);
-  // Ajusta a cor da barra do navegador (quando suportado)
   const meta = document.querySelector('meta[name="theme-color"]');
   if(meta){
     const bg = getComputedStyle(document.body).getPropertyValue('--bg').trim() || '#121212';
@@ -511,10 +582,9 @@ const DB_KEY = 'finapp_db_v9';
 const monthsPT = ["Jan","Fev","Mar","Abr","Mai","Jun","Jul","Ago","Set","Out","Nov","Dez"];
 const monthsFull = ["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
 const defaultCats = ['🛒 Mercado','🍔 Alimentacao','🚗 Transporte','🍺 Lazer','🏠 Casa','💊 Saude','✈️ Viagem','⚙️ Outros'];
-const defaultCards = ['Inter','XP','Mercado Pago']; // Defaults // Defaults
+const defaultCards = ['Inter','XP','Mercado Pago']; 
 const LEG_MAIN_KEY='financeDB_v8'; const LEG_CFG_PREFIX='survival_cfg_v4_'; const LEG_DETAILS_PREFIX='survival_details_v3_';
 
-// CORES FIXAS (SYNC)
 const catColors = { '🛒 Mercado': '#3498db', 'Mercado': '#3498db', '🍔 Alimentacao': '#e67e22', 'Alimentacao': '#e67e22', '🍺 Lazer': '#f1c40f', 'Lazer': '#f1c40f', '🚗 Transporte': '#1abc9c', 'Transporte': '#1abc9c', '🏠 Casa': '#9b59b6', 'Casa': '#9b59b6', '💊 Saude': '#e91e63', 'Saude': '#e91e63', '✈️ Viagem': '#2ecc71', 'Viagem': '#2ecc71', '⚙️ Outros': '#95a5a6', 'Outros': '#95a5a6' };
 const palette = ['#34495e', '#16a085', '#27ae60', '#2980b9', '#8e44ad', '#d35400', '#c0392b'];
 function getCatColor(c){ if(catColors[c]) return catColors[c]; let hash = 0; for (let i = 0; i < c.length; i++) hash = c.charCodeAt(i) + ((hash << 5) - hash); return palette[Math.abs(hash) % palette.length]; }
@@ -550,7 +620,18 @@ const pad2=(n)=>String(n).padStart(2,'0');
 const monthKey=(y,m)=>`${y}-${pad2(m+1)}`;
 const daysInMonth=(y,m)=>new Date(y, m+1, 0).getDate();
 function money(v){ return (v||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'}); }
+
+function formatBRNumber(v){ const n = Number(v)||0; return n.toLocaleString('pt-BR',{minimumFractionDigits:2, maximumFractionDigits:2}); }
 function parseAmount(expr){ const s=String(expr||'').replace(/\s+/g,'').replace(',', '.'); if(!s)throw new Error('empty'); if(!/^[0-9+\-\.]+$/.test(s))throw new Error('invalid'); const sum=(s.match(/[+\-]?\d*\.?\d+/g)||[]).reduce((a,p)=>a+(parseFloat(p)||0),0); if(!Number.isFinite(sum))throw new Error('invalid'); return sum; }
+function parseBRNumber(x){
+  let s = String(x ?? '').trim();
+  if(!s) return 0;
+  s = s.replace(/\s+/g,'');
+  if (s.includes(',') && s.includes('.')) { s = s.replace(/\./g,'').replace(',', '.'); } 
+  else { s = s.replace(',', '.'); }
+  const n = Number(s);
+  return Number.isFinite(n) ? n : 0;
+}
 function uid(){ return `${Date.now().toString(36)}_${Math.random().toString(36).slice(2,8)}`; }
 function escapeHtml(str){ return String(str||'').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'","&#039;"); }
 
@@ -573,7 +654,34 @@ function getMonth(){ return ensureMonthModel(state.year, state.month); }
 function sumExtras(list){ return (list||[]).reduce((a,x)=>a + (Number(x.val)||0),0); }
 function sumCards(list){ return (list||[]).reduce((a,x)=>a + ((!x.paid?1:0) * (Number(x.val)||0)),0); }
 function sumFixed(list){ return (list||[]).reduce((a,x)=>a + ((!x.paid?1:0) * (Number(x.val)||0)),0); }
-function dayTotalFromTx(list){ return (list||[]).reduce((acc,tx)=>{ const v=Number(tx.val)||0; return acc+(tx.type==='entrada'?-v:v); },0); }
+function sumCardsPaid(list){ return (list||[]).reduce((a,x)=>a + ((x.paid?1:0) * (Number(x.val)||0)),0); }
+function sumFixedPaid(list){ return (list||[]).reduce((a,x)=>a + ((x.paid?1:0) * (Number(x.val)||0)),0); }
+
+function isCreditTx(tx){
+  const m = (tx&&tx.method)||'';
+  return m === 'Credito' || m === 'Crédito' || m === 'Cartao' || m === 'Cartão';
+}
+
+function dayCashTotalFromTx(list){
+  return (list||[]).reduce((acc,tx)=>{
+    if(isCreditTx(tx) && !tx.isPig) return acc; 
+    const v = Number(tx.val)||0;
+    return acc + (tx.type==='entrada' ? -v : v);
+  },0);
+}
+
+function getPiggyTotal(model) {
+    let total = 0;
+    const dim = daysInMonth(state.year, state.month);
+    for(let d=1; d<=dim; d++){
+        const list = model.txByDay[String(d)] || [];
+        list.forEach(tx => {
+            if(tx.isPig) total += (Number(tx.val) || 0);
+        });
+    }
+    return total;
+}
+
 function dayObsFromTx(list){ 
     if(!list||!list.length)return ''; 
     return list.map(tx=>{
@@ -587,21 +695,25 @@ function dayObsFromTx(list){
 
 function buildMonthlySummary(model){
   const income=(Number(model.incomes.adiant)||0)+(Number(model.incomes.sal)||0)+sumExtras(model.incomes.extras);
-  const fixedOnly = sumFixed(model.expenses.fixed);
-  const cardsOnly = sumCards(model.expenses.cards);
-  const fixedTotal = fixedOnly + cardsOnly;
+
+  const fixedOnly = sumFixed(model.expenses.fixed);   
+  const cardsOnly = sumCards(model.expenses.cards);   
+  const fixedTotal = fixedOnly + cardsOnly;           
+
+  const fixedPaid = sumFixedPaid(model.expenses.fixed); 
+  const cardsPaid = sumCardsPaid(model.expenses.cards); 
   const dim=daysInMonth(state.year, state.month);
   const bar=[]; const cats={}; let dailyTotal=0;
   for(let d=1; d<=dim; d++){
     const list=model.txByDay[String(d)];
     let dv=0;
     if(list&&list.length){
-      dv=dayTotalFromTx(list);
-      list.forEach(tx=>{ if(tx.type==='saida') cats[tx.cat]=(cats[tx.cat]||0)+(Number(tx.val)||0); });
+      dv=dayCashTotalFromTx(list);
+      list.forEach(tx=>{ if(tx.type==='saida' && !isCreditTx(tx)) cats[tx.cat]=(cats[tx.cat]||0)+(Number(tx.val)||0); });
     } else dv=Number(model.manualDaily[String(d)]||0);
     bar.push(dv); dailyTotal+=dv;
   }
-  return {income, fixedOnly, cardsOnly, fixedTotal, dailyTotal, sobra:income-fixedTotal-dailyTotal, bar, cats};
+  return {income, fixedOnly, cardsOnly, fixedTotal, fixedPaid, cardsPaid, fixedSpent:(fixedPaid+cardsPaid), dailyTotal, sobraNow:(income-(fixedPaid+cardsPaid)-dailyTotal), sobra:(income-(fixedPaid+cardsPaid)-dailyTotal)-fixedTotal, bar, cats};
 }
 
 function computeDailyMetaAndSaldo(model){
@@ -610,7 +722,7 @@ function computeDailyMetaAndSaldo(model){
   let saldo=start; const metas=[]; const totals=[];
   for(let day=1; day<=dim; day++){
     const list=model.txByDay[String(day)];
-    const total=(list&&list.length)?dayTotalFromTx(list):Number(model.manualDaily[String(day)]||0);
+    const total=(list&&list.length)?dayCashTotalFromTx(list):Number(model.manualDaily[String(day)]||0);
     totals.push(total);
     let wd=0, we=0;
     for(let k=day; k<=dim; k++){ const dow=new Date(state.year,state.month,k).getDay(); if(dow===0||dow===6)we++; else wd++; }
@@ -658,9 +770,10 @@ function setupTabs(){
   tm.onclick=()=>{ switchTab(tm, vm); renderMonthly(); };
   tr.onclick=()=>{ switchTab(tr, vr); renderReports(); };
 }
+
 function setupDailyConfig(){
   const i=document.getElementById('inpStartBalance'), s=document.getElementById('selWeekendFactor'), b=document.getElementById('btnUseMonthlySobra');
-  i.onchange=()=>{getMonth().cfg.startBalance=Number(i.value)||0;saveDB();renderDaily();};
+  i.onchange=()=>{getMonth().cfg.startBalance=parseBRNumber(i.value);saveDB();renderDaily();};
   s.onchange=()=>{getMonth().cfg.weekendFactor=Number(s.value)||1;saveDB();renderDaily();};
   b.onclick=()=>{const m=getMonth(), sm=buildMonthlySummary(m); m.cfg.startBalance=Math.max(0,sm.income-sm.fixedTotal); saveDB();renderDaily();};
   document.getElementById('btnGoToday').onclick=()=>{
@@ -669,7 +782,6 @@ function setupDailyConfig(){
   };
 }
 
-// CATS & CARDS MODALS
 function openCatModal(){ document.getElementById('modalCats').classList.add('active'); renderCatManager(); }
 function renderCatManager(){ document.getElementById('catListContainer').innerHTML=(state.db.categories||[]).map((c,i)=>`<div class="cat-list-item"><span>${escapeHtml(c)}</span><button class="btn danger" onclick="delCat(${i})">🗑️</button></div>`).join(''); }
 function addCat(){ const v=document.getElementById('newCatName').value.trim(); if(v && !state.db.categories.includes(v)){ state.db.categories.push(v); saveDB(); document.getElementById('newCatName').value=''; renderCatManager(); } }
@@ -680,18 +792,25 @@ function renderCardManager(){ document.getElementById('cardListContainer').inner
 function addCardDB(){ const v=document.getElementById('newCardName').value.trim(); if(v && !state.db.cards.includes(v)){ state.db.cards.push(v); saveDB(); document.getElementById('newCardName').value=''; renderCardManager(); } }
 window.delCard=(i)=>{if(confirm('Excluir cartão?')){state.db.cards.splice(i,1);saveDB();renderCardManager();}};
 
-// TRANSACTIONS
 function toggleCardSelect(){
     const method = document.getElementById('txMethod').value;
     const cardSelect = document.getElementById('txCard');
     if(method === 'Credito'){
         cardSelect.style.display = '';
-        // Preenche cartões
         cardSelect.innerHTML = (state.db.cards||[]).map(c => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('');
     } else {
         cardSelect.style.display = 'none';
     }
 }
+
+// ==== FUNÇÃO DA CALCULADORA ====
+window.calcCardBill = () => {
+    const t = parseBRNumber(document.getElementById('calcBillTotal').value);
+    const p = parseBRNumber(document.getElementById('calcPiggySaved').value);
+    let diff = t - p;
+    if(diff < 0) diff = 0;
+    document.getElementById('calcResult').textContent = money(diff);
+};
 
 function openDayModal(d){
   state.editing.day=d; state.editing.txId=null;
@@ -756,7 +875,7 @@ function setupModal(){
 
 function setupMonthly(){
   const ia=document.getElementById('inpAdiant'), is=document.getElementById('inpSal'), tn=document.getElementById('txtNotes');
-  const up=()=>{ getMonth().incomes.adiant=Number(ia.value)||0; getMonth().incomes.sal=Number(is.value)||0; saveDB(); renderMonthly(); };
+  const up=()=>{ getMonth().incomes.adiant=parseBRNumber(ia.value); getMonth().incomes.sal=parseBRNumber(is.value); saveDB(); renderMonthly(); };
   ia.onchange=up; is.onchange=up; tn.onchange=()=>{getMonth().notes=tn.value;saveDB();};
   document.getElementById('btnAddExtra').onclick=()=>{getMonth().incomes.extras.push({desc:'Novo',val:0});saveDB();renderMonthly();};
   document.getElementById('btnAddFixed').onclick=()=>{getMonth().expenses.fixed.push({desc:'Nova',val:0,paid:false});saveDB();renderMonthly();};
@@ -769,14 +888,20 @@ function renderTableDynamic(id,list,k){
   const hasPaid = (k==='fixed' || k==='cards');
   list.forEach((x,i)=>{
     const tr=document.createElement('tr');
-    tr.innerHTML=`${hasPaid?`<td style="vertical-align:middle;text-align:center"><input type="checkbox" ${x.paid?'checked':''} onchange="updList('${k}',${i},'paid',this.checked)" style="width:auto;margin:0"></td>`:''}<td><input type="text" value="${escapeHtml(x.desc)}" onchange="updList('${k}',${i},'desc',this.value)" class="m-desc" ${x.paid?'style="text-decoration:line-through;opacity:0.6"':''}></td><td><input type="number" step="0.01" value="${x.val}" onchange="updList('${k}',${i},'val',this.value)" class="m-val"></td><td style="text-align:right"><button class="btn danger" onclick="delList('${k}',${i})" style="padding:4px 8px;font-size:0.8rem">X</button></td>`;
+    tr.innerHTML=`${hasPaid?`<td style="vertical-align:middle;text-align:center"><input type="checkbox" ${x.paid?'checked':''} onchange="updList('${k}',${i},'paid',this.checked)" style="width:auto;margin:0"></td>`:''}<td><input type="text" value="${escapeHtml(x.desc)}" onchange="updList('${k}',${i},'desc',this.value)" class="m-desc" ${x.paid?'style="text-decoration:line-through;opacity:0.6"':''}></td><td><input type="text" inputmode="decimal" value="${formatBRNumber(x.val)}" onchange="updList(\'${k}\',${i},\'val\',this.value)" class="m-val"></td><td style="text-align:right"><button class="btn danger" onclick="delList('${k}',${i})" style="padding:4px 8px;font-size:0.8rem">X</button></td>`;
     tb.appendChild(tr);
   });
 }
-window.updList=(k,i,f,v)=>{ const l=k==='extras'?getMonth().incomes.extras:(k==='fixed'?getMonth().expenses.fixed:getMonth().expenses.cards); l[i][f]=f==='val'?Number(v)||0:v; saveDB(); renderMonthly(); };
-window.delList=(k,i)=>{ if(confirm('Apagar?')){ const l=k==='extras'?getMonth().incomes.extras:(k==='fixed'?getMonth().expenses.fixed:getMonth().expenses.cards); l.splice(i,1); saveDB(); renderMonthly(); } };
+window.updList=(k,i,f,v)=>{
+  const l = k==='extras'
+    ? getMonth().incomes.extras
+    : (k==='fixed' ? getMonth().expenses.fixed : getMonth().expenses.cards);
 
-// === RELATÓRIOS ===
+  l[i][f] = (f==='val') ? parseBRNumber(v) : v;
+  saveDB();
+  renderMonthly();
+};
+window.delList=(k,i)=>{ if(confirm('Apagar?')){ const l=k==='extras'?getMonth().incomes.extras:(k==='fixed'?getMonth().expenses.fixed:getMonth().expenses.cards); l.splice(i,1); saveDB(); renderMonthly(); } };
 
 function normalizeMethod(m){
   const s = String(m||'').toLowerCase().trim();
@@ -784,7 +909,6 @@ function normalizeMethod(m){
   if(s.startsWith('cred')) return 'Credito';
   if(s.startsWith('deb')) return 'Debito';
   if(s.startsWith('din')) return 'Dinheiro';
-  // fallback
   if(m==='Pix'||m==='Credito'||m==='Debito'||m==='Dinheiro') return m;
   return 'Pix';
 }
@@ -793,15 +917,12 @@ function normalizeCard(c){
   return s || null;
 }
 
-// === RELATÓRIOS ===
 function renderReports(){
     const m = getMonth();
     const dim = daysInMonth(state.year, state.month);
-
-    // Agrega dados por Método e por Fonte (Pix ou cada cartão)
     const stats = { Pix:{val:0, cats:{}}, Credito:{val:0, cats:{}, byCard:{}}, Debito:{val:0, cats:{}}, Dinheiro:{val:0, cats:{}} };
-    const sources = {}; // {key:{label,val,cats,items:[]}}
-    const fullList = []; // extrato geral (saídas)
+    const sources = {};
+    const fullList = [];
 
     const addToCats = (obj, cat, val)=>{ obj[cat] = (obj[cat]||0) + val; };
 
@@ -815,13 +936,11 @@ function renderReports(){
                 stats[met].val += Number(tx.val)||0;
                 addToCats(stats[met].cats, tx.cat, Number(tx.val)||0);
 
-                // Crédito por cartão
                 if(met === 'Credito'){
                     const cName = card || 'Sem cartão';
                     stats.Credito.byCard[cName] = (stats.Credito.byCard[cName]||0) + (Number(tx.val)||0);
                 }
 
-                // Fonte: Pix / Débito / Dinheiro / ou nome do cartão (Crédito)
                 const sourceKey = (met==='Credito') ? (card || 'Sem cartão') : met;
                 if(!sources[sourceKey]) sources[sourceKey] = { label: sourceKey, val:0, cats:{}, items:[] };
                 sources[sourceKey].val += Number(tx.val)||0;
@@ -833,7 +952,6 @@ function renderReports(){
         });
     }
 
-    // Chart Methods
     if(hasChart()){
         const ctx = document.getElementById('chartMethods').getContext('2d'); 
         safeDestroy(charts.methods);
@@ -847,9 +965,7 @@ function renderReports(){
         });
     }
 
-    // Extrato Geral (tudo)
     fullList.sort((a,b) => a.day - b.day);
-    // === Gastos por Pix / Cartão (detalhado) ===
     const sel = document.getElementById('selSourceFilter');
     const selFrom = document.getElementById('selDayFrom');
     const selTo = document.getElementById('selDayTo');
@@ -858,11 +974,10 @@ function renderReports(){
     const tb = document.getElementById('tblSourceReport');
 
     if(sel && tb){
-        // monta opções: Pix, Débito, Dinheiro e cartões (Crédito)
         const keys = Object.keys(sources).sort((a,b)=> (sources[b].val||0)-(sources[a].val||0));
         const keep = ['Pix','Debito','Dinheiro'];
         const ordered = [...keep.filter(k=>sources[k]), ...keys.filter(k=>!keep.includes(k))];
-        // Range de dias (no mês selecionado)
+        
         const dimNow = dim;
         const prevFrom = Number(selFrom.value || 1);
         const prevTo = Number(selTo.value || dimNow);
@@ -872,20 +987,17 @@ function renderReports(){
         selTo.value   = String(Math.min(Math.max(prevTo,1), dimNow));
         if(Number(selFrom.value) > Number(selTo.value)) selTo.value = selFrom.value;
 
-
         sel.innerHTML = `<option value="ALL">Tudo</option>` + ordered.map(k=>`<option value="${escapeHtml(k)}">${escapeHtml(k)}</option>`).join('');
+        
         const renderSource = ()=>{
             const val = sel.value;
             const from = Number(selFrom.value||1);
             const to = Number(selTo.value||dim);
             const inRange = (tx)=> (tx.day>=from && tx.day<=to);
 
-            const baseList = (val==='ALL')
-              ? fullList
-              : (sources[val]?.items || []);
+            const baseList = (val==='ALL') ? fullList : (sources[val]?.items || []);
             const list = baseList.filter(inRange);
 
-            // resumo (cards) (aplica range)
             if(sumBox){
                 const cards = ordered.map(k=>{
                     const v = (sources[k]?.items || []).filter(inRange).reduce((a,x)=>a+(Number(x.val)||0),0);
@@ -902,7 +1014,6 @@ function renderReports(){
                 hint.textContent = (val==='ALL') ? `Mostrando saídas do mês${periodTxt}.` : `Mostrando apenas: ${val}${periodTxt}.`;
             }
 
-            // tabela
             const out = (list||[]).slice().sort((a,b)=>a.day-b.day).map(tx=>{
                 const sourceLabel = (tx.method==='Credito') ? (tx.card||'Sem cartão') : tx.method;
                 return `
@@ -926,11 +1037,15 @@ function renderReports(){
 }
 
 function renderDaily(){
-  const m=getMonth(); document.getElementById('inpStartBalance').value=m.cfg.startBalance||''; document.getElementById('selWeekendFactor').value=m.cfg.weekendFactor||1;
+  const m=getMonth(); const sb=m.cfg.startBalance||0; document.getElementById('inpStartBalance').value=sb?formatBRNumber(sb):''; document.getElementById('selWeekendFactor').value=m.cfg.weekendFactor||1;
   const {metas,totals,saldo}=computeDailyMetaAndSaldo(m);
   const dim=daysInMonth(state.year,state.month);
   const today=new Date(); const isCur=(today.getFullYear()===state.year&&today.getMonth()===state.month);
   
+  const piggyTotal = getPiggyTotal(m);
+  const elPiggy = document.getElementById('dailyPiggy');
+  if(elPiggy) elPiggy.textContent = money(piggyTotal);
+
   if(isCur && today.getDate()<=dim){
     const d=today.getDate(); const w=(today.getDay()===0||today.getDay()===6);
     document.getElementById('dailyMeta').textContent=money(metas[d-1]);
@@ -949,7 +1064,7 @@ function renderDaily(){
       if(manualVal > 0){ activeCats.add('Manual'); rawData[d]['Manual'] = (rawData[d]['Manual'] || 0) + manualVal; }
       
       const dt=new Date(state.year,state.month,d); const w=(dt.getDay()===0||dt.getDay()===6);
-      const total = dayTotalFromTx(list) + (list.length?0:manualVal);
+      const total = dayCashTotalFromTx(list) + (list.length?0:manualVal);
       const hasTx = list.length > 0;
       const meta = metas[d-1]||0;
       const obs = hasTx ? dayObsFromTx(list) : '';
@@ -973,13 +1088,11 @@ function renderDaily(){
     const cats=Object.keys(s.cats).sort((a,b)=>s.cats[b]-s.cats[a]); const vals=cats.map(c=>s.cats[c]);
     const pieCtx=document.getElementById('chartDailyPie').getContext('2d'); safeDestroy(charts.dailyPie);
     charts.dailyPie=new Chart(pieCtx,{type:'doughnut',data:{labels:cats,datasets:[{data:vals,backgroundColor:cats.map(c=>getCatColor(c)),borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,layout:{padding:10},plugins:{legend:{display:false}}}});
-    
-    const tot=vals.reduce((a,b)=>a+b,0)||1;
   }
 }
 
 function renderMonthly(){
-  const m=getMonth(); document.getElementById('inpAdiant').value=m.incomes.adiant||''; document.getElementById('inpSal').value=m.incomes.sal||''; document.getElementById('txtNotes').value=m.notes||'';
+  const m=getMonth(); document.getElementById('inpAdiant').value=formatBRNumber(m.incomes.adiant||0); document.getElementById('inpSal').value=formatBRNumber(m.incomes.sal||0); document.getElementById('txtNotes').value=m.notes||''; document.getElementById('lblTotalFixo').textContent=money((m.incomes.adiant||0)+(m.incomes.sal||0));
   renderTableDynamic('tblExtras',m.incomes.extras,'extras'); renderTableDynamic('tblFixed',m.expenses.fixed,'fixed'); renderTableDynamic('tblCards',m.expenses.cards,'cards');
   const s=buildMonthlySummary(m);
   document.getElementById('mIncome').textContent=money(s.income); document.getElementById('mFixed').textContent=money(s.fixedTotal); document.getElementById('mDaily').textContent=money(s.dailyTotal);
@@ -987,7 +1100,7 @@ function renderMonthly(){
   
   if(hasChart()){
     const mc=document.getElementById('chartMacro').getContext('2d'); safeDestroy(charts.macro);
-    const macroData = [s.fixedOnly, s.cardsOnly, s.dailyTotal, Math.max(0, s.sobra)];
+    const macroData = [s.fixedPaid, s.cardsPaid, s.dailyTotal, Math.max(0, s.sobraNow)];
     const macroColors = ['#c0392b', '#e74c3c', '#9b59b6', '#333'];
     charts.macro=new Chart(mc,{type:'doughnut',data:{labels:['Fixos', 'Cartões', 'Diário', 'Sobra'],datasets:[{ data: macroData, backgroundColor: macroColors, borderWidth:0 }]},options:{responsive:true, maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{color:'#aaa', font:{size:10}}}}}});
     
@@ -997,26 +1110,19 @@ function renderMonthly(){
   }
   const pigsTotal = sumPigs(ensurePigsModel(m));
   const totalPagar = s.fixedTotal + s.dailyTotal;
-  const sobraPos = s.income - totalPagar;
+  const sobraPos = s.sobra; 
   const sobraComPigs = sobraPos + pigsTotal;
 
   document.getElementById('macroRanking').innerHTML = `<div style="display:flex;justify-content:space-between;border-bottom:1px solid #222;padding:8px 0;font-size:.9rem"><div>💰 Receitas</div><div style="color:var(--primary)">${money(s.income)}</div></div><div style="display:flex;justify-content:space-between;border-bottom:1px solid #222;padding:8px 0;font-size:.9rem"><div>🔒 Fixos <span class="muted" style="font-size:0.7em">(Boleto)</span></div><div style="color:#c0392b">${money(s.fixedOnly)}</div></div><div style="display:flex;justify-content:space-between;border-bottom:1px solid #222;padding:8px 0;font-size:.9rem"><div>💳 Cartões</div><div style="color:#e74c3c">${money(s.cardsOnly)}</div></div><div style="display:flex;justify-content:space-between;border-bottom:1px solid #222;padding:8px 0;font-size:.9rem"><div>💸 Diário</div><div style="color:#9b59b6">${money(s.dailyTotal)}</div></div><div style="display:flex;justify-content:space-between;padding:8px 0;font-size:1rem;font-weight:bold;margin-top:5px"><div>📌 Total a pagar</div><div style="color:#e74c3c">${money(s.fixedTotal + s.dailyTotal)}</div></div><div style="display:flex;justify-content:space-between;border-top:1px solid #222;padding:10px 0;font-size:1rem;font-weight:900"><div>✅ Sobra (após pagar)</div><div style="color:${sobraPos>=0?'var(--primary)':'var(--secondary)'}">${money(sobraPos)}</div></div><div style="display:flex;justify-content:space-between;padding:8px 0;font-size:1rem;font-weight:900"><div>🐷 Sobra + Porquinhos</div><div style="color:${sobraComPigs>=0?'var(--primary)':'var(--secondary)'}">${money(sobraComPigs)}</div></div>`;
   renderPigsUI();
 }
-// === PORQUINHOS / CDB (por banco) ===
+
 function ensurePigsModel(model){
   if(!model.pigsByBank) model.pigsByBank = {};
   if(!state.db.pigsBanks) state.db.pigsBanks = [...(state.db.cards||defaultCards)];
-  // garante todas as chaves atuais
   (state.db.pigsBanks||[]).forEach(b=>{ if(model.pigsByBank[b]===undefined) model.pigsByBank[b]=0; });
-  // remove bancos que foram deletados da lista (se deletou, some da UI e dos cálculos)
   Object.keys(model.pigsByBank).forEach(b=>{ if(!(state.db.pigsBanks||[]).includes(b)) delete model.pigsByBank[b]; });
   return model.pigsByBank;
-}
-function prevMonthKey(y,m){
-  const d = new Date(y, m, 1);
-  d.setMonth(d.getMonth()-1);
-  return monthKey(d.getFullYear(), d.getMonth());
 }
 function sumPigs(map){
   return Object.values(map||{}).reduce((a,v)=>a + (Number(v)||0), 0);
@@ -1072,16 +1178,13 @@ window.updPigValue = (bank, val) => {
 window.delPigBank = (bank) => {
   bank = decodeURIComponent(bank);
   if(!confirm('Excluir este banco do porquinho?')) return;
-  // remove da lista principal
   state.db.pigsBanks = (state.db.pigsBanks||[]).filter(b=>b!==bank);
-  // remove os dados desse banco em TODOS os meses (para não reaparecer)
   Object.keys(state.db.months||{}).forEach(k=>{
     const mm = state.db.months[k];
     if(mm && mm.pigsByBank && mm.pigsByBank[bank] !== undefined) delete mm.pigsByBank[bank];
   });
   saveDB();
   renderPigsUI();
-  // atualiza números do mensal/resultado se estiver visível
   try{ renderMonthly(); }catch(e){}
 };
 function addPigBank(){
@@ -1093,7 +1196,6 @@ function addPigBank(){
   if(state.db.pigsBanks.includes(v)) return;
   state.db.pigsBanks.push(v);
   inp.value='';
-  // garante chave no mês atual
   const model = getMonth(); ensurePigsModel(model);
   if(model.pigsByBank[v]===undefined) model.pigsByBank[v]=0;
   saveDB();
